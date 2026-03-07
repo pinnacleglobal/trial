@@ -150,6 +150,14 @@ function populateFeeSelectors() {
   for (let i = 0; i <= 12; i++) tuitionSelect.innerHTML += `<option value="${i}">${i}</option>`;
   for (let i = 0; i <= 11; i++) transportSelect.innerHTML += `<option value="${i}">${i}</option>`;
   for (let i = 0; i <= 2; i++) examSelect.innerHTML += `<option value="${i}">${i}</option>`;
+
+  // Automatic calculation on change
+  tuitionSelect.addEventListener("change", calculateFees);
+  transportSelect.addEventListener("change", calculateFees);
+  examSelect.addEventListener("change", calculateFees);
+
+  // Initial calculation
+  calculateFees();
 }
 
 function calculateFees() {
@@ -159,9 +167,12 @@ function calculateFees() {
 
   const monthlyTuition = parseFloat(document.getElementById("monthlyTuition").innerText.replace("₹","")) || 0;
   const transportFees = parseFloat(document.getElementById("transportFees").innerText.replace("₹","")) || 0;
+  const discount = parseFloat(document.getElementById("discount").innerText.replace("₹","")) || 0;
   const examFeePerMonth = 500;
 
-  const total = (tuitionMonths * monthlyTuition) + (transportMonths * transportFees) + (examMonths * examFeePerMonth);
+  const total = (tuitionMonths * (monthlyTuition - discount)) + (transportMonths * transportFees) + (examMonths * examFeePerMonth);
 
-  document.getElementById("calcTotal").innerText = "₹" + total;
+  const calcTotal = document.getElementById("calcTotal");
+  calcTotal.innerText = "₹" + total;
+  calcTotal.style.color = total>0 ? "red" : "green";
 }
