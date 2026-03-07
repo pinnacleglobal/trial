@@ -30,7 +30,7 @@ body{
   padding:30px;
 }
 
-input{
+input, select{
   padding:12px;
   width:230px;
   font-size:16px;
@@ -238,6 +238,30 @@ tr:nth-child(even){
   <div class="profile">
     <div class="info"><span class="label">Total Fees Paid in Current Session :</span> <span id="totalPaid"></span></div>
     <div class="info"><span class="label">Fee Balance :</span> <span id="feeBalance"></span></div>
+  </div>
+
+  <!-- FEE CALCULATOR -->
+  <div class="section-title">Calculate Fees</div>
+  <div class="profile">
+    <div class="info">
+      <label class="label">Choose Monthly Tuition Fee Months :</label>
+      <select id="calcTuitionMonths"></select>
+    </div>
+    <div class="info">
+      <label class="label">Choose Transport Fee Months :</label>
+      <select id="calcTransportMonths"></select>
+    </div>
+    <div class="info">
+      <label class="label">Choose Exam Fee Months :</label>
+      <select id="calcExamMonths"></select>
+    </div>
+    <div class="info">
+      <label class="label">Fees to be Paid :</label>
+      <span id="calcTotal">₹0</span>
+    </div>
+    <div class="info">
+      <button onclick="calculateFees()">Calculate</button>
+    </div>
   </div>
 
   <div class="logout">
