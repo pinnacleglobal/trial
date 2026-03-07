@@ -124,6 +124,9 @@ async function login() {
     document.getElementById("loader").style.display="none";
     document.getElementById("portal").style.display="block";
 
+    // Populate calculator dropdowns
+    populateFeeSelectors();
+
   } catch(e){
     console.error(e);
     alert("Error loading data. Check console.");
@@ -133,3 +136,32 @@ async function login() {
 }
 
 function logout(){ location.reload(); }
+
+// ------------------ FEE CALCULATOR ------------------
+function populateFeeSelectors() {
+  const tuitionSelect = document.getElementById("calcTuitionMonths");
+  const transportSelect = document.getElementById("calcTransportMonths");
+  const examSelect = document.getElementById("calcExamMonths");
+
+  tuitionSelect.innerHTML = "";
+  transportSelect.innerHTML = "";
+  examSelect.innerHTML = "";
+
+  for (let i = 0; i <= 12; i++) tuitionSelect.innerHTML += `<option value="${i}">${i}</option>`;
+  for (let i = 0; i <= 11; i++) transportSelect.innerHTML += `<option value="${i}">${i}</option>`;
+  for (let i = 0; i <= 2; i++) examSelect.innerHTML += `<option value="${i}">${i}</option>`;
+}
+
+function calculateFees() {
+  const tuitionMonths = parseInt(document.getElementById("calcTuitionMonths").value);
+  const transportMonths = parseInt(document.getElementById("calcTransportMonths").value);
+  const examMonths = parseInt(document.getElementById("calcExamMonths").value);
+
+  const monthlyTuition = parseFloat(document.getElementById("monthlyTuition").innerText.replace("₹","")) || 0;
+  const transportFees = parseFloat(document.getElementById("transportFees").innerText.replace("₹","")) || 0;
+  const examFeePerMonth = 500;
+
+  const total = (tuitionMonths * monthlyTuition) + (transportMonths * transportFees) + (examMonths * examFeePerMonth);
+
+  document.getElementById("calcTotal").innerText = "₹" + total;
+}
