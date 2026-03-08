@@ -151,7 +151,6 @@ function populateFeeSelectors() {
   for (let i = 0; i <= 11; i++) transportSelect.innerHTML += `<option value="${i}">${i}</option>`;
   for (let i = 0; i <= 2; i++) examSelect.innerHTML += `<option value="${i}">${i}</option>`;
 
-  // Automatic calculation on change
   tuitionSelect.addEventListener("change", calculateFees);
   transportSelect.addEventListener("change", calculateFees);
   examSelect.addEventListener("change", calculateFees);
@@ -175,7 +174,6 @@ function calculateFees() {
   calcTotal.innerText = "₹" + total;
   calcTotal.style.color = total>0 ? "red" : "green";
 
-  // Pay Now button functionality
   const payNowBtn = document.getElementById("payNowBtn");
   payNowBtn.onclick = () => {
     if(total <= 0){
@@ -185,12 +183,16 @@ function calculateFees() {
 
     if(confirm(`You are about to pay ₹${total} to Pinnacle Global School. Continue?`)){
       const upiId = "pinnacleglobalschool.62697340@hdfcbank";
-      const upiLink = `upi://pay?pa=${upiId}&pn=Pinnacle Global School&mc=&tid=&tr=&tn=School Fee Payment&am=${total}&cu=INR`;
+      const upiLink = `upi://pay?pa=${upiId}&pn=Pinnacle Global School&tid=&tr=&tn=School Fee Payment&am=${total}&cu=INR`;
       window.location.href = upiLink;
     }
   };
 }
+
+// ------------------ MOBILE LOGIN FIX ------------------
 document.addEventListener("DOMContentLoaded", () => {
-  const loginBtn = document.getElementById("loginBtn");
-  loginBtn.addEventListener("click", login);
+  document.getElementById("loginBtn").addEventListener("click", login);
+  document.getElementById("loginCode").addEventListener("keypress", function(e){
+    if(e.key === "Enter") login();
+  });
 });
