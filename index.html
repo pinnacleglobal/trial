@@ -153,10 +153,21 @@ tr:nth-child(even){
   }
 }
 
+/* Mobile-only Pay Now button */
+.mobile-only{
+  display:none;
+}
+@media(max-width:600px){
+  .mobile-only{
+    display:inline-block;
+  }
+}
+
 .logout{
   text-align:center;
   margin:20px;
 }
+
 .pay-btn{
   background:#28a745;
   color:white;
@@ -270,7 +281,7 @@ tr:nth-child(even){
       <span id="calcTotal">₹0</span>
     </div>
     <div class="info">
-      <button id="payNowBtn" class="pay-btn">Pay Now</button>
+      <button id="payNowBtn" class="pay-btn mobile-only">Pay Now</button>
     </div>
   </div>
 
