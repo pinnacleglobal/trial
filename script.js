@@ -156,7 +156,6 @@ function populateFeeSelectors() {
   transportSelect.addEventListener("change", calculateFees);
   examSelect.addEventListener("change", calculateFees);
 
-  // Initial calculation
   calculateFees();
 }
 
@@ -175,4 +174,15 @@ function calculateFees() {
   const calcTotal = document.getElementById("calcTotal");
   calcTotal.innerText = "₹" + total;
   calcTotal.style.color = total>0 ? "red" : "green";
-}
+
+  // Pay Now button functionality
+  const payNowBtn = document.getElementById("payNowBtn");
+  payNowBtn.onclick = () => {
+    if(total <= 0){
+      alert("Please select months to calculate fees before paying.");
+      return;
+    }
+
+    if(confirm(`You are about to pay ₹${total} to Pinnacle Global School. Continue?`)){
+      const upiId = "pinnacleglobalschool.62697340@hdfcbank";
+     
