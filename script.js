@@ -127,6 +127,9 @@ async function login() {
     // Populate calculator dropdowns
     populateFeeSelectors();
 
+    // Setup Fee Balance Pay Now button
+    setupFeeBalancePayment();
+
   } catch(e){
     console.error(e);
     alert("Error loading data. Check console.");
@@ -180,13 +183,32 @@ function calculateFees() {
       alert("Please select months to calculate fees before paying.");
       return;
     }
-
     if(confirm(`You are about to pay ₹${total} to Pinnacle Global School. Continue?`)){
       const upiId = "pinnacleglobalschool.62697340@hdfcbank";
       const upiLink = `upi://pay?pa=${upiId}&pn=Pinnacle Global School&tid=&tr=&tn=School Fee Payment&am=${total}&cu=INR`;
       window.location.href = upiLink;
     }
   };
+}
+
+// ------------------ FEE BALANCE PAYMENT ------------------
+function setupFeeBalancePayment(){
+  const payBalanceBtn = document.getElementById("payBalanceBtn");
+  if(payBalanceBtn){
+    payBalanceBtn.addEventListener("click", () => {
+      const feeBalance = parseFloat(document.getElementById("feeBalance").innerText.replace("₹","")) || 0;
+      if(feeBalance <= 0){
+        alert("No balance to pay.");
+        return;
+      }
+
+      if(confirm(`You are about to pay your Fee Balance of ₹${feeBalance} to Pinnacle Global School. Continue?`)){
+        const upiId = "pinnacleglobalschool.62697340@hdfcbank";
+        const upiLink = `upi://pay?pa=${upiId}&pn=Pinnacle Global School&tid=&tr=&tn=School Fee Payment&am=${feeBalance}&cu=INR`;
+        window.location.href = upiLink;
+      }
+    });
+  }
 }
 
 // ------------------ MOBILE LOGIN FIX ------------------
