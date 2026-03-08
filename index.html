@@ -157,6 +157,16 @@ tr:nth-child(even){
   text-align:center;
   margin:20px;
 }
+.pay-btn{
+  background:#28a745;
+  color:white;
+  border:none;
+  padding:12px 25px;
+  border-radius:4px;
+  cursor:pointer;
+  font-size:16px;
+  margin-top:10px;
+}
 </style>
 </head>
 
@@ -258,6 +268,9 @@ tr:nth-child(even){
     <div class="info">
       <label class="label">Fees to be Paid :</label>
       <span id="calcTotal">₹0</span>
+    </div>
+    <div class="info">
+      <button id="payNowBtn" class="pay-btn">Pay Now</button>
     </div>
   </div>
 
