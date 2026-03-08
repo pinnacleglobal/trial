@@ -194,21 +194,28 @@ function calculateFees() {
 // ------------------ FEE BALANCE PAYMENT ------------------
 function setupFeeBalancePayment(){
   const payBalanceBtn = document.getElementById("payBalanceBtn");
-  if(payBalanceBtn){
-    payBalanceBtn.addEventListener("click", () => {
-      const feeBalance = parseFloat(document.getElementById("feeBalance").innerText.replace("₹","")) || 0;
-      if(feeBalance <= 0){
-        alert("No balance to pay.");
-        return;
-      }
+  if(!payBalanceBtn) return;
 
-      if(confirm(`You are about to pay your Fee Balance of ₹${feeBalance} to Pinnacle Global School. Continue?`)){
-        const upiId = "pinnacleglobalschool.62697340@hdfcbank";
-        const upiLink = `upi://pay?pa=${upiId}&pn=Pinnacle Global School&tid=&tr=&tn=School Fee Payment&am=${feeBalance}&cu=INR`;
-        window.location.href = upiLink;
-      }
-    });
-  }
+  payBalanceBtn.addEventListener("click", () => {
+    // Get Fee Balance and remove any formatting like ₹ or commas
+    let feeBalanceText = document.getElementById("feeBalance").innerText || "0";
+    feeBalanceText = feeBalanceText.replace(/[₹,]/g, '');
+    const feeBalance = parseFloat(feeBalanceText);
+
+    if(feeBalance <= 0){
+      alert("No balance to pay.");
+      return;
+    }
+
+    const confirmMsg = `You are about to pay your Fee Balance of ₹${feeBalance.toFixed(2)} to Pinnacle Global School. Continue?`;
+    if(confirm(confirmMsg)){
+      const upiId = "pinnacleglobalschool.62697340@hdfcbank";
+      const upiLink = `upi://pay?pa=${upiId}&pn=Pinnacle Global School&tid=&tr=&tn=School Fee Payment&am=${feeBalance.toFixed(2)}&cu=INR`;
+      
+      // Open UPI app
+      window.location.href = upiLink;
+    }
+  });
 }
 
 // ------------------ MOBILE LOGIN FIX ------------------
