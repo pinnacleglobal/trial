@@ -185,4 +185,8 @@ function calculateFees() {
 
     if(confirm(`You are about to pay ₹${total} to Pinnacle Global School. Continue?`)){
       const upiId = "pinnacleglobalschool.62697340@hdfcbank";
-     
+      const upiLink = `upi://pay?pa=${upiId}&pn=Pinnacle Global School&mc=&tid=&tr=&tn=School Fee Payment&am=${total}&cu=INR`;
+      window.location.href = upiLink;
+    }
+  };
+}
