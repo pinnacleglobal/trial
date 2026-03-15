@@ -245,7 +245,13 @@ return;
 
 const upi="pinnacleglobalschool.62697340@hdfcbank";
 
-const link=`upi://pay?pa=${upi}&pn=Pinnacle Global School&am=${total}&cu=INR&tn=School Fee Payment`;
+const adm=document.getElementById("adm").innerText;
+const name=document.getElementById("studentName").innerText;
+const cls=document.getElementById("class").innerText;
+
+const note=`${adm} ${name} ${cls} FEE`;
+
+const link=`upi://pay?pa=${upi}&pn=Pinnacle Global School&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;
 
 window.location.href=link;
 
@@ -270,8 +276,13 @@ return;
 
 const upi="pinnacleglobalschool.62697340@hdfcbank";
 
-const link=`upi://pay?pa=${upi}&pn=Pinnacle Global School&am=${amount}&cu=INR&tn=School Fee Payment`;
+const adm=document.getElementById("adm").innerText;
+const name=document.getElementById("studentName").innerText;
+const cls=document.getElementById("class").innerText;
 
+const note=`${adm} ${name} ${cls} FEE`;
+
+const link=`upi://pay?pa=${upi}&pn=Pinnacle Global School&am=${total}&cu=INR&tn=${encodeURIComponent(note)}`;
 window.location.href=link;
 
 });
