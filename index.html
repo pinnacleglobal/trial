@@ -153,7 +153,6 @@ tr:nth-child(even){
   }
 }
 
-/* Mobile-only buttons */
 .mobile-only{
   display:none;
 }
@@ -178,122 +177,145 @@ tr:nth-child(even){
   font-size:16px;
   margin-top:10px;
 }
+
+.instructions{
+  margin-top:15px;
+  font-size:14px;
+  background:#fff3cd;
+  padding:12px;
+  border-radius:6px;
+}
 </style>
 </head>
 
 <body>
 
 <div class="header">
-  <img src="images/logo.png" class="logo">
-  <h2>Student Fee Portal</h2>
+<img src="images/logo.png" class="logo">
+<h2>Student Fee Portal</h2>
 </div>
 
 <div class="login-box" id="loginBox">
-  <h3>Student Login</h3>
-  <input type="text" id="loginCode" placeholder="Enter Login Code">
-  <br><br>
-  <button id="loginBtn">Login</button>
+<h3>Student Login</h3>
+<input type="text" id="loginCode" placeholder="Enter Login Code">
+<br><br>
+<button id="loginBtn">Login</button>
 </div>
 
 <div class="loader" id="loader">
-  <div class="spinner"></div>
-  <br>
-  Loading Student Data...
+<div class="spinner"></div>
+<br>
+Loading Student Data...
 </div>
 
 <div id="portal" style="display:none">
 
-  <!-- WELCOME -->
-  <div class="profile" style="text-align:center; background:#0b3d91; color:white; margin:15px; padding:15px; border-radius:10px;">
-    <h2 id="welcomeName">Welcome, Student</h2>
-  </div>
+<div class="profile" style="text-align:center; background:#0b3d91; color:white;">
+<h2 id="welcomeName">Welcome</h2>
+</div>
 
-  <!-- STUDENT DETAILS -->
-  <div class="section-title">Student Details</div>
-  <div class="profile">
-    <div class="info"><span class="label">Student Name :</span> <span id="studentName"></span></div>
-    <div class="info"><span class="label">Admission Number :</span> <span id="adm"></span></div>
-    <div class="info"><span class="label">Class :</span> <span id="class"></span></div>
-    <div class="info"><span class="label">Father's Name :</span> <span id="father"></span></div>
-    <div class="info"><span class="label">Mother's Name :</span> <span id="mother"></span></div>
-    <div class="info"><span class="label">Phone Number :</span> <span id="phone"></span></div>
-    <div class="info"><span class="label">Address :</span> <span id="address"></span></div>
-  </div>
+<div class="section-title">Student Details</div>
+<div class="profile">
+<div class="info"><span class="label">Student Name :</span> <span id="studentName"></span></div>
+<div class="info"><span class="label">Admission Number :</span> <span id="adm"></span></div>
+<div class="info"><span class="label">Class :</span> <span id="class"></span></div>
+<div class="info"><span class="label">Father's Name :</span> <span id="father"></span></div>
+<div class="info"><span class="label">Mother's Name :</span> <span id="mother"></span></div>
+<div class="info"><span class="label">Phone Number :</span> <span id="phone"></span></div>
+<div class="info"><span class="label">Address :</span> <span id="address"></span></div>
+</div>
 
-  <!-- PAID FEE DETAILS -->
-  <div class="section-title">Paid Fee Details</div>
-  <div class="table-container">
-    <table>
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Slip Number</th>
-          <th>Amount Paid</th>
-          <th>Fee Type</th>
-          <th>Session</th>
-          <th>Tuition Fee Months</th>
-          <th>Transport Fee Months</th>
-          <th>Exam Fee Months</th>
-          <th>Payment Mode</th>
-        </tr>
-      </thead>
-      <tbody id="feeTable"></tbody>
-    </table>
-  </div>
-  <div class="fee-cards" id="feeCards"></div>
+<div class="section-title">Paid Fee Details</div>
 
-  <!-- FEE STRUCTURE -->
-  <div class="section-title">Fee Structure</div>
-  <div class="profile">
-    <div class="info"><span class="label">Monthly Tuition Fees :</span> <span id="monthlyTuition"></span></div>
-    <div class="info"><span class="label">Tuition Fees for Months :</span> <span id="tuitionMonths"></span></div>
-    <div class="info"><span class="label">Transport Fees :</span> <span id="transportFees"></span></div>
-    <div class="info"><span class="label">Transport Fees Months :</span> <span id="transportMonths"></span></div>
-    <div class="info"><span class="label">Exam Fee :</span> ₹1000</div>
-    <div class="info"><span class="label">Previous Year Fee Remain :</span> <span id="prevRemain"></span></div>
-    <div class="info"><span class="label">Discount :</span> <span id="discount"></span></div>
-  </div>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>Date</th>
+<th>Slip Number</th>
+<th>Amount Paid</th>
+<th>Fee Type</th>
+<th>Session</th>
+<th>Tuition Fee Months</th>
+<th>Transport Fee Months</th>
+<th>Exam Fee Months</th>
+<th>Payment Mode</th>
+</tr>
+</thead>
+<tbody id="feeTable"></tbody>
+</table>
+</div>
 
-  <!-- FEE SUMMARY -->
-  <div class="section-title">Fee Summary</div>
-  <div class="profile">
-    <div class="info"><span class="label">Total Fees Paid in Current Session :</span> <span id="totalPaid"></span></div>
-    <div class="info"><span class="label">Fee Balance :</span> <span id="feeBalance"></span></div>
-    <div class="info">
-      <button id="payBalanceBtn" class="pay-btn mobile-only">Pay Now</button>
-    </div>
-  </div>
+<div class="fee-cards" id="feeCards"></div>
 
-  <!-- FEE CALCULATOR -->
-  <div class="section-title">Calculate Fees</div>
-  <div class="profile">
-    <div class="info">
-      <label class="label">Choose Monthly Tuition Fee Months :</label>
-      <select id="calcTuitionMonths"></select>
-    </div>
-    <div class="info">
-      <label class="label">Choose Transport Fee Months :</label>
-      <select id="calcTransportMonths"></select>
-    </div>
-    <div class="info">
-      <label class="label">Choose Exam Fee Months :</label>
-      <select id="calcExamMonths"></select>
-    </div>
-    <div class="info">
-      <label class="label">Fees to be Paid :</label>
-      <span id="calcTotal">₹0</span>
-    </div>
-    <div class="info">
-      <button id="payNowBtn" class="pay-btn mobile-only">Pay Now</button>
-    </div>
-  </div>
+<div class="section-title">Fee Structure</div>
+<div class="profile">
+<div class="info"><span class="label">Monthly Tuition Fees :</span> <span id="monthlyTuition"></span></div>
+<div class="info"><span class="label">Tuition Fees for Months :</span> <span id="tuitionMonths"></span></div>
+<div class="info"><span class="label">Transport Fees :</span> <span id="transportFees"></span></div>
+<div class="info"><span class="label">Transport Fees Months :</span> <span id="transportMonths"></span></div>
+<div class="info"><span class="label">Exam Fee :</span> ₹1000</div>
+<div class="info"><span class="label">Previous Year Fee Remain :</span> <span id="prevRemain"></span></div>
+<div class="info"><span class="label">Discount :</span> <span id="discount"></span></div>
+</div>
 
-  <div class="logout">
-    <button onclick="logout()">Logout</button>
-  </div>
+<div class="section-title">Fee Summary</div>
+<div class="profile">
+<div class="info"><span class="label">Total Fees Paid in Current Session :</span> <span id="totalPaid"></span></div>
+<div class="info"><span class="label">Fee Balance :</span> <span id="feeBalance"></span></div>
+<div class="info">
+<button id="payBalanceBtn" class="pay-btn mobile-only">Pay Now</button>
+</div>
+</div>
+
+<div class="section-title">Calculate Fees</div>
+<div class="profile">
+
+<div class="info">
+<label class="label">Choose Monthly Tuition Fee Months :</label>
+<select id="calcTuitionMonths"></select>
+</div>
+
+<div class="info">
+<label class="label">Choose Transport Fee Months :</label>
+<select id="calcTransportMonths"></select>
+</div>
+
+<div class="info">
+<label class="label">Choose Exam Fee Months :</label>
+<select id="calcExamMonths"></select>
+</div>
+
+<div class="info">
+<label class="label">Fees to be Paid :</label>
+<span id="calcTotal">₹0</span>
+</div>
+
+<div class="info">
+<button id="payNowBtn" class="pay-btn mobile-only">Pay Now</button>
+</div>
+
+<div class="instructions">
+
+<b>Important Instructions:</b><br>
+1. Please share the screenshot of the payment with the school, then only the receipt slip will be made.<br>
+2. Please do not share login code with anyone.<br><br>
+
+<b>महत्वपूर्ण निर्देश:</b><br>
+1. कृपया भुगतान का स्क्रीनशॉट स्कूल के साथ साझा करें, तभी रसीद जारी की जाएगी।<br>
+2. कृपया लॉगिन कोड किसी के साथ साझा न करें।
+
+</div>
+
+</div>
+
+<div class="logout">
+<button onclick="logout()">Logout</button>
+</div>
 
 </div>
 
 <script src="script.js"></script>
+
 </body>
 </html>
