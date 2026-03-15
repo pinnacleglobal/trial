@@ -14,8 +14,8 @@ alert("Enter Login Code");
 return;
 }
 
-document.getElementById("loader").style.display="block";
 document.getElementById("loginBtn").disabled=true;
+document.getElementById("loader").style.display="block";
 
 try{
 
@@ -45,16 +45,15 @@ phone=r[22]||"";
 address=r[7]||"";
 
 break;
+
 }
 
 }
 
 if(loginBlocked){
-
 alert("You Cannot Login As You Have Left The School. Please Contact The School.");
 location.reload();
 return;
-
 }
 
 if(admission==""){
@@ -84,6 +83,7 @@ transportFees=parseFloat(r[7])||0;
 transportMonths=parseFloat(r[8])||0;
 
 break;
+
 }
 
 }
@@ -152,7 +152,9 @@ cards+=`<div class="fee-card">
 }
 
 let examFee=1000;
+
 let totalFee=((monthlyTuition-discount)*tuitionMonths)+(transportFees*transportMonths)+examFee+prevRemain;
+
 let feeBalance=totalFee-totalPaid;
 
 document.getElementById("feeTable").innerHTML=table;
@@ -167,6 +169,7 @@ document.getElementById("discount").innerText="₹"+discount;
 document.getElementById("totalPaid").innerText="₹"+totalPaid;
 
 let bal=document.getElementById("feeBalance");
+
 bal.innerText="₹"+feeBalance;
 bal.style.color=feeBalance>0?"red":"green";
 
@@ -181,6 +184,9 @@ setupFeeBalancePayment();
 
 console.error(e);
 alert("Error loading data");
+
+document.getElementById("loader").style.display="none";
+document.getElementById("loginBtn").disabled=false;
 
 }
 
@@ -233,7 +239,7 @@ document.getElementById("calcTotal").innerText="₹"+total;
 document.getElementById("payNowBtn").onclick=()=>{
 
 if(total<=0){
-alert("Select months first");
+alert("Please select months before paying");
 return;
 }
 
@@ -272,8 +278,12 @@ window.location.href=link;
 
 }
 
+document.addEventListener("DOMContentLoaded",()=>{
+
 document.getElementById("loginBtn").addEventListener("click",login);
 
 document.getElementById("loginCode").addEventListener("keypress",function(e){
 if(e.key==="Enter") login();
+});
+
 });
