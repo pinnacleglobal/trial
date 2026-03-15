@@ -1,13 +1,16 @@
-const sheetID="1TBykyZx-eRMBDrRGBGGA8p_49iHlVDKN3wt9wijHJWM";
-const apiKey="AIzaSyB5VIy4kIySW7bVrjNYMpL5rkqZ7Oe758E";
+const sheetID = "1TBykyZx-eRMBDrRGBGGA8p_49iHlVDKN3wt9wijHJWM";
+const apiKey = "AIzaSyB5VIy4kIySW7bVrjNYMpL5rkqZ7Oe758E";
 
-const masterSheet=encodeURIComponent("Master Data 25 (New)");
-const feesSheet=encodeURIComponent("Fees Collection");
-const awSheet=encodeURIComponent("AW");
+const masterSheet = encodeURIComponent("Master Data 25 (New)");
+const feesSheet = encodeURIComponent("Fees Collection");
+const awSheet = encodeURIComponent("AW");
 
-async function login(){
+let admissionGlobal="";
+let firstNameGlobal="";
 
-const code=document.getElementById("loginCode").value.trim();
+async function login() {
+
+const code = document.getElementById("loginCode").value.trim();
 
 if(code==""){
 alert("Enter Login Code");
@@ -19,9 +22,10 @@ document.getElementById("loader").style.display="block";
 
 try{
 
-let resp=await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetID}/values/${awSheet}?key=${apiKey}`);
-let data=await resp.json();
-let rows=data.values||[];
+// AW SHEET
+let resp = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetID}/values/${awSheet}?key=${apiKey}`);
+let data = await resp.json();
+let rows = data.values || [];
 
 let admission="",studentName="",father="",mother="",phone="",address="";
 let loginBlocked=false;
@@ -45,7 +49,6 @@ phone=r[22]||"";
 address=r[7]||"";
 
 break;
-
 }
 
 }
@@ -62,11 +65,16 @@ location.reload();
 return;
 }
 
-resp=await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetID}/values/${masterSheet}?key=${apiKey}`);
-data=await resp.json();
-rows=data.values||[];
+// store global values for payment note
+admissionGlobal = admission;
+firstNameGlobal = studentName.split(" ")[0];
 
-let studentClass="",monthlyTuition=0,tuitionMonths=0,transportFees=0,transportMonths=0,prevRemain=0,discount=0;
+// MASTER SHEET
+resp = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetID}/values/${masterSheet}?key=${apiKey}`);
+data = await resp.json();
+rows = data.values || [];
+
+let studentClass="", monthlyTuition=0, tuitionMonths=0, transportFees=0, transportMonths=0, prevRemain=0, discount=0;
 
 for(let i=1;i<rows.length;i++){
 
@@ -88,18 +96,21 @@ break;
 
 }
 
-document.getElementById("studentName").innerText=studentName;
-document.getElementById("welcomeName").innerText="Welcome, "+studentName;
-document.getElementById("class").innerText=studentClass;
-document.getElementById("adm").innerText=admission;
-document.getElementById("father").innerText=father;
-document.getElementById("mother").innerText=mother;
-document.getElementById("phone").innerText=phone;
-document.getElementById("address").innerText=address;
+// DISPLAY STUDENT
+document.getElementById("studentName").innerText = studentName;
+document.getElementById("welcomeName").innerText = "Welcome, " + studentName;
+document.getElementById("class").innerText = studentClass;
+document.getElementById("adm").innerText = admission;
+document.getElementById("father").innerText = father;
+document.getElementById("mother").innerText = mother;
+document.getElementById("phone").innerText = phone;
+document.getElementById("address").innerText = address;
 
-resp=await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetID}/values/${feesSheet}?key=${apiKey}`);
-data=await resp.json();
-rows=data.values||[];
+
+// FEES SHEET
+resp = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetID}/values/${feesSheet}?key=${apiKey}`);
+data = await resp.json();
+rows = data.values || [];
 
 let table="",cards="",totalPaid=0;
 
@@ -151,28 +162,30 @@ cards+=`<div class="fee-card">
 
 }
 
+// FEE SUMMARY
 let examFee=1000;
 
 let totalFee=((monthlyTuition-discount)*tuitionMonths)+(transportFees*transportMonths)+examFee+prevRemain;
 
 let feeBalance=totalFee-totalPaid;
 
-document.getElementById("feeTable").innerHTML=table;
-document.getElementById("feeCards").innerHTML=cards;
+document.getElementById("feeTable").innerHTML = table;
+document.getElementById("feeCards").innerHTML = cards;
 
-document.getElementById("monthlyTuition").innerText="₹"+monthlyTuition;
-document.getElementById("tuitionMonths").innerText=tuitionMonths;
-document.getElementById("transportFees").innerText="₹"+transportFees;
-document.getElementById("transportMonths").innerText=transportMonths;
-document.getElementById("prevRemain").innerText="₹"+prevRemain;
-document.getElementById("discount").innerText="₹"+discount;
-document.getElementById("totalPaid").innerText="₹"+totalPaid;
+document.getElementById("monthlyTuition").innerText = "₹"+monthlyTuition;
+document.getElementById("tuitionMonths").innerText = tuitionMonths;
+document.getElementById("transportFees").innerText = "₹"+transportFees;
+document.getElementById("transportMonths").innerText = transportMonths;
+document.getElementById("prevRemain").innerText = "₹"+prevRemain;
+document.getElementById("discount").innerText = "₹"+discount;
+document.getElementById("totalPaid").innerText = "₹"+totalPaid;
 
 let bal=document.getElementById("feeBalance");
 
 bal.innerText="₹"+feeBalance;
 bal.style.color=feeBalance>0?"red":"green";
 
+// SHOW PORTAL
 document.getElementById("loginBox").style.display="none";
 document.getElementById("loader").style.display="none";
 document.getElementById("portal").style.display="block";
@@ -196,27 +209,27 @@ function logout(){
 location.reload();
 }
 
+
+// CALCULATOR
 function populateFeeSelectors(){
 
 const tuition=document.getElementById("calcTuitionMonths");
 const transport=document.getElementById("calcTransportMonths");
 const exam=document.getElementById("calcExamMonths");
 
-for(let i=0;i<=12;i++){
-tuition.innerHTML+=`<option value="${i}">${i}</option>`;
-}
+tuition.innerHTML="";
+transport.innerHTML="";
+exam.innerHTML="";
 
-for(let i=0;i<=11;i++){
-transport.innerHTML+=`<option value="${i}">${i}</option>`;
-}
-
-for(let i=0;i<=2;i++){
-exam.innerHTML+=`<option value="${i}">${i}</option>`;
-}
+for(let i=0;i<=12;i++) tuition.innerHTML+=`<option value="${i}">${i}</option>`;
+for(let i=0;i<=11;i++) transport.innerHTML+=`<option value="${i}">${i}</option>`;
+for(let i=0;i<=2;i++) exam.innerHTML+=`<option value="${i}">${i}</option>`;
 
 tuition.addEventListener("change",calculateFees);
 transport.addEventListener("change",calculateFees);
 exam.addEventListener("change",calculateFees);
+
+calculateFees();
 
 }
 
@@ -226,9 +239,9 @@ const t=parseInt(document.getElementById("calcTuitionMonths").value);
 const tr=parseInt(document.getElementById("calcTransportMonths").value);
 const ex=parseInt(document.getElementById("calcExamMonths").value);
 
-const monthly=parseFloat(document.getElementById("monthlyTuition").innerText.replace("₹",""));
-const transport=parseFloat(document.getElementById("transportFees").innerText.replace("₹",""));
-const discount=parseFloat(document.getElementById("discount").innerText.replace("₹",""));
+const monthly=parseFloat(document.getElementById("monthlyTuition").innerText.replace("₹",""))||0;
+const transport=parseFloat(document.getElementById("transportFees").innerText.replace("₹",""))||0;
+const discount=parseFloat(document.getElementById("discount").innerText.replace("₹",""))||0;
 
 const examFee=500;
 
@@ -239,45 +252,49 @@ document.getElementById("calcTotal").innerText="₹"+total;
 document.getElementById("payNowBtn").onclick=()=>{
 
 if(total<=0){
-alert("Please select months before paying");
+alert("Please select months before paying.");
 return;
 }
 
-const upi="pinnacleglobalschool.62697340@hdfcbank";
+let note=`${admissionGlobal} ${firstNameGlobal} FEE`;
 
-const link=`upi://pay?pa=${upi}&pn=Pinnacle Global School&am=${total}&cu=INR&tn=School Fee Payment`;
+let upiLink=`upi://pay?pa=pinnacleglobalschool.62697340@hdfcbank&pn=Pinnacle Global School&am=${total}&cu=INR&tn=${encodeURIComponent(note)}`;
 
-window.location.href=link;
+window.location.href=upiLink;
 
 };
 
 }
 
+
+// FEE BALANCE PAYMENT
 function setupFeeBalancePayment(){
 
 const btn=document.getElementById("payBalanceBtn");
 
 btn.addEventListener("click",()=>{
 
-let text=document.getElementById("feeBalance").innerText.replace(/[^0-9]/g,"");
+let text=document.getElementById("feeBalance").innerText.replace(/[^0-9.]/g,'');
 
 let amount=parseFloat(text);
 
 if(amount<=0){
-alert("No balance to pay");
+alert("No balance to pay.");
 return;
 }
 
-const upi="pinnacleglobalschool.62697340@hdfcbank";
+let note=`${admissionGlobal} ${firstNameGlobal} FEE`;
 
-const link=`upi://pay?pa=${upi}&pn=Pinnacle Global School&am=${amount}&cu=INR&tn=School Fee Payment`;
+let upiLink=`upi://pay?pa=pinnacleglobalschool.62697340@hdfcbank&pn=Pinnacle Global School&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;
 
-window.location.href=link;
+window.location.href=upiLink;
 
 });
 
 }
 
+
+// MOBILE LOGIN FIX
 document.addEventListener("DOMContentLoaded",()=>{
 
 document.getElementById("loginBtn").addEventListener("click",login);
