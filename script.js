@@ -96,9 +96,12 @@ async function login() {
 
     } catch (e) {
         console.error(e);
-        alert("Error loading data");
+        // Remove alert to prevent blocking page
+        // alert("Error loading data");
         document.getElementById("loader").style.display = "none";
         document.getElementById("loginBtn").disabled = false;
+        // Still setup buttons if possible
+        setupSendScreenshotButton();
     }
 }
 
@@ -159,7 +162,8 @@ function setupSendScreenshotButton() {
     const sendBtns = [
         document.getElementById("sendScreenshotBalanceBtn"),
         document.getElementById("sendScreenshotCalcBtn")
-    ];
+    ].filter(Boolean);
+
     sendBtns.forEach(btn => {
         btn.addEventListener("click", () => {
             const adm = document.getElementById("adm").innerText.trim();
