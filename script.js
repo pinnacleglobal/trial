@@ -96,11 +96,8 @@ async function login() {
 
     } catch (e) {
         console.error(e);
-        // Remove alert to prevent blocking page
-        // alert("Error loading data");
         document.getElementById("loader").style.display = "none";
         document.getElementById("loginBtn").disabled = false;
-        // Still setup buttons if possible
         setupSendScreenshotButton();
     }
 }
