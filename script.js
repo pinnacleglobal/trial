@@ -17,7 +17,6 @@ async function login() {
     document.getElementById("loader").style.display = "block";
 
     try {
-        // Fetch AW sheet
         let resp = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetID}/values/${awSheet}?key=${apiKey}`);
         let data = await resp.json();
         let rows = data.values || [];
@@ -54,7 +53,7 @@ async function login() {
             return;
         }
 
-        // Fetch Master Data
+        // Master Data
         resp = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetID}/values/${masterSheet}?key=${apiKey}`);
         data = await resp.json();
         rows = data.values || [];
@@ -85,7 +84,7 @@ async function login() {
         document.getElementById("phone").innerText = phone;
         document.getElementById("address").innerText = address;
 
-        // Fetch Fees Collection
+        // Fees Collection
         resp = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetID}/values/${feesSheet}?key=${apiKey}`);
         data = await resp.json();
         rows = data.values || [];
@@ -160,6 +159,7 @@ async function login() {
 
         populateFeeSelectors();
         setupFeeBalancePayment();
+        setupSendScreenshotButton();
 
     } catch (e) {
         console.error(e);
@@ -197,12 +197,9 @@ function calculateFees() {
     const discount = parseFloat(document.getElementById("discount").innerText.replace("₹", ""));
 
     const examFee = 500;
-
     let total = (t * (monthly - discount)) + (tr * transport) + (ex * examFee);
-
     document.getElementById("calcTotal").innerText = "₹" + total;
 
-    // Pay Now button
     document.getElementById("payNowBtn").onclick = () => {
         if (total <= 0) {
             alert("Please select months before paying");
@@ -240,6 +237,21 @@ function setupFeeBalancePayment() {
 
         const link = `upi://pay?pa=${upi}&pn=Pinnacle Global School&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;
         window.location.href = link;
+    });
+}
+
+function setupSendScreenshotButton() {
+    const btn = document.getElementById("sendScreenshotBtn");
+    btn.addEventListener("click", () => {
+        const adm = document.getElementById("adm").innerText.trim();
+        const name = document.getElementById("studentName").innerText.trim();
+        const cls = document.getElementById("class").innerText.trim();
+
+        const message = `Hello, I have completed the fee payment.\nAdmission No: ${adm}\nName: ${name}\nClass: ${cls}\nPlease find the attached screenshot of my payment.`;
+        const phone = "917830968000"; // WhatsApp number in international format
+
+        const link = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+        window.open(link, "_blank");
     });
 }
 
