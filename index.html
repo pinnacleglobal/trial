@@ -190,6 +190,20 @@ font-size:16px;
 margin-top:10px;
 }
 
+/* Mobile-friendly WhatsApp buttons */
+.whatsapp-btn{
+background:#25D366 !important;
+color:white !important;
+font-size:14px !important;
+padding:8px 12px !important;
+border-radius:6px !important;
+border:none;
+margin-top:5px;
+display:inline-block;
+text-align:center;
+cursor:pointer;
+width:fit-content;
+}
 </style>
 </head>
 
@@ -271,15 +285,13 @@ Loading Student Data...
 <div class="profile">
 
 <div class="info"><span class="label">Total Fees Paid in Current Session :</span> <span id="totalPaid"></span></div>
-
 <div class="info"><span class="label">Fee Balance :</span> <span id="feeBalance"></span></div>
 
 <div class="info">
 <button id="payBalanceBtn" class="pay-btn mobile-only">Pay Now</button>
 </div>
-
 <div class="info">
-<button id="sendScreenshotBalanceBtn" class="pay-btn mobile-only" style="background:#25D366;">Send Payment Screenshot to WhatsApp</button>
+<button id="sendScreenshotBalanceBtn" class="whatsapp-btn mobile-only">Send Screenshot to WhatsApp</button>
 </div>
 
 <div class="instructions">
@@ -321,9 +333,8 @@ Loading Student Data...
 <div class="info">
 <button id="payNowBtn" class="pay-btn mobile-only">Pay Now</button>
 </div>
-
 <div class="info">
-<button id="sendScreenshotCalcBtn" class="pay-btn mobile-only" style="background:#25D366;">Send Payment Screenshot to WhatsApp</button>
+<button id="sendScreenshotCalcBtn" class="whatsapp-btn mobile-only">Send Screenshot to WhatsApp</button>
 </div>
 
 <div class="instructions">
