@@ -14,7 +14,6 @@ async function login() {
     document.getElementById("loader").style.display = "block";
 
     try {
-        // AW SHEET
         let resp = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetID}/values/${awSheet}?key=${apiKey}`);
         let rows = (await resp.json()).values || [];
 
@@ -35,7 +34,6 @@ async function login() {
         if(loginBlocked){ alert("You Cannot Login"); location.reload(); return; }
         if(!admission){ alert("Invalid Login Code"); location.reload(); return; }
 
-        // MASTER DATA
         resp = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetID}/values/${masterSheet}?key=${apiKey}`);
         rows = (await resp.json()).values || [];
 
@@ -57,7 +55,7 @@ async function login() {
             }
         }
 
-        // FILL DATA
+        // Fill data
         document.getElementById("studentName").innerText=studentName;
         document.getElementById("welcomeName").innerText="Welcome, "+studentName;
         document.getElementById("class").innerText=studentClass;
@@ -75,7 +73,7 @@ async function login() {
         document.getElementById("discount").innerText="₹"+discount;
         document.getElementById("examFee").innerText="₹"+globalExamFee;
 
-        // FEES COLLECTION
+        // Fees collection
         resp = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetID}/values/${feesSheet}?key=${apiKey}`);
         rows = (await resp.json()).values || [];
 
@@ -126,7 +124,7 @@ async function login() {
     }
 }
 
-// CALCULATOR
+// Calculator
 function populateFeeSelectors(){
     const t=document.getElementById("calcTuitionMonths");
     const tr=document.getElementById("calcTransportMonths");
@@ -159,7 +157,7 @@ function calculateFees(){
     document.getElementById("payNowBtn").onclick=()=>payUPI(total);
 }
 
-// PAY
+// Pay
 function payUPI(amount){
     if(amount<=0){ alert("Select months"); return; }
 
@@ -174,7 +172,7 @@ function payUPI(amount){
     window.location.href=link;
 }
 
-// BUTTONS
+// Buttons
 function setupButtons(){
 
     document.getElementById("payBalanceBtn").onclick=()=>{
