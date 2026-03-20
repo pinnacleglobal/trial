@@ -55,22 +55,22 @@ tr:nth-child(even){background:#e8f1ff;}
 /* Important Instructions styling */
 .instructions, .calc-instructions{
   font-size:14px;
-  margin-top:4px;
   line-height:1.4;
   background:#fff3cd;
   padding:6px;
   border-radius:5px;
+  margin-top:4px;
 }
 
-/* Important Instructions heading on one line, points on next line */
+/* Important Instructions heading on one line, points below (no extra line) */
 .instructions b, .calc-instructions b{
   display:block;
-  margin-bottom:3px;
+  margin-bottom:2px;
 }
 
 /* Hide calculate fees instructions on desktop */
 @media(min-width:601px){
-  .calc-instructions{display:none;}
+  .calc-instructions, .instructions{display:none;}
 }
 </style>
 </head>
@@ -147,10 +147,10 @@ tr:nth-child(even){background:#e8f1ff;}
 <button id="sendScreenshotBalanceBtn" class="whatsapp-btn mobile-only">Send Screenshot to WhatsApp</button>
 
 <div class="instructions">
-<b>Important Instructions:</b><br>
+<b>Important Instructions:</b>
 1. Please share the screenshot of the payment with the school, then only the receipt slip will be made.<br>
 2. Please do not share login code with anyone.<br>
-<b>महत्वपूर्ण निर्देश:</b><br>
+<b>महत्वपूर्ण निर्देश:</b>
 1. कृपया भुगतान का स्क्रीनशॉट स्कूल के साथ साझा करें, तभी रसीद जारी की जाएगी।<br>
 2. कृपया लॉगिन कोड किसी के साथ साझा न करें।
 </div>
@@ -178,20 +178,18 @@ tr:nth-child(even){background:#e8f1ff;}
   <button id="payNowBtn" class="pay-btn mobile-only">Pay Now</button>
   <button id="sendScreenshotCalcBtn" class="whatsapp-btn mobile-only">Send Screenshot to WhatsApp</button>
 
-  <div class="instructions calc-instructions">
-    <b>Important Instructions:</b><br>
-    1. Please share the screenshot of the payment with the school, then only the receipt slip will be made.<br>
-    2. Please do not share login code with anyone.<br>
-    <b>महत्वपूर्ण निर्देश:</b><br>
-    1. कृपया भुगतान का स्क्रीनशॉट स्कूल के साथ साझा करें, तभी रसीद जारी की जाएगी।<br>
-    2. कृपया लॉगिन कोड किसी के साथ साझा न करें।
+  <div class="calc-instructions">
+<b>Important Instructions:</b>
+1. Please share the screenshot of the payment with the school, then only the receipt slip will be made.<br>
+2. Please do not share login code with anyone.<br>
+<b>महत्वपूर्ण निर्देश:</b>
+1. कृपया भुगतान का स्क्रीनशॉट स्कूल के साथ साझा करें, तभी रसीद जारी की जाएगी।<br>
+2. कृपया लॉगिन कोड किसी के साथ साझा न करें।
   </div>
 </div>
 
 <div class="logout">
 <button onclick="logout()">Logout</button>
-</div>
-
 </div>
 
 <script src="script.js"></script>
