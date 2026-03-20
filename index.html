@@ -68,9 +68,9 @@ tr:nth-child(even){background:#e8f1ff;}
   margin-bottom:2px;
 }
 
-/* Hide calculate fees instructions on desktop */
+/* Hide calculate fees instructions on desktop only */
 @media(min-width:601px){
-  .calc-instructions, .instructions{display:none;}
+  .calc-instructions{display:none;}
 }
 </style>
 </head>
@@ -146,7 +146,7 @@ tr:nth-child(even){background:#e8f1ff;}
 <button id="payBalanceBtn" class="pay-btn mobile-only">Pay Now</button>
 <button id="sendScreenshotBalanceBtn" class="whatsapp-btn mobile-only">Send Screenshot to WhatsApp</button>
 
-<div class="instructions">
+<div class="instructions mobile-only">
 <b>Important Instructions:</b>
 1. Please share the screenshot of the payment with the school, then only the receipt slip will be made.<br>
 2. Please do not share login code with anyone.<br>
@@ -175,10 +175,12 @@ tr:nth-child(even){background:#e8f1ff;}
 
   <div class="calc-total">Fees to be paid: <span id="calcTotal">₹0</span></div>
 
+  <!-- Smaller Pay Now button like Fee Summary -->
   <button id="payNowBtn" class="pay-btn mobile-only">Pay Now</button>
   <button id="sendScreenshotCalcBtn" class="whatsapp-btn mobile-only">Send Screenshot to WhatsApp</button>
 
-  <div class="calc-instructions">
+  <!-- Instructions hidden on desktop -->
+  <div class="calc-instructions mobile-only">
 <b>Important Instructions:</b>
 1. Please share the screenshot of the payment with the school, then only the receipt slip will be made.<br>
 2. Please do not share login code with anyone.<br>
