@@ -45,7 +45,7 @@ async function login() {
         for (let i=1;i<rows.length;i++){
             let r=rows[i];
             if (r[1]==admission){
-                studentClass=r[14]||""; // ✅ FIXED (Column O)
+                studentClass=r[14]||"";
                 monthlyTuition=parseFloat(r[4])||0;
                 prevRemain=parseFloat(r[3])||0;
                 discount=parseFloat(r[5])||0;
