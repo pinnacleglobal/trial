@@ -174,7 +174,6 @@ function payUPI(amount){
 
 // Buttons
 function setupButtons(){
-
     document.getElementById("payBalanceBtn").onclick=()=>{
         let amount=parseFloat(document.getElementById("feeBalance").innerText.replace(/[^0-9]/g,""));
         payUPI(amount);
