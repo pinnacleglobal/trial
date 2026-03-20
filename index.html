@@ -15,8 +15,7 @@ body{font-family:Arial;margin:0;background:#f2f5ff;}
 
 input, select{
 padding:12px;
-width:100%;
-max-width:300px;
+width:230px;
 font-size:16px;
 border:1px solid #ccc;
 border-radius:4px;
@@ -30,7 +29,7 @@ color:white;
 border:none;
 border-radius:4px;
 cursor:pointer;
-margin-top:10px;
+margin-top:8px;
 }
 
 .loader{text-align:center;padding:30px;display:none;}
@@ -55,48 +54,29 @@ box-shadow:0 2px 6px rgba(0,0,0,0.1);
 .info{margin:8px 0;}
 .label{font-weight:bold;}
 
-table{width:100%;border-collapse:collapse;}
-th,td{border:1px solid #ddd;padding:8px;text-align:center;}
-th{background:#0b3d91;color:white;}
-
-.fee-cards{display:none;}
-@media(max-width:600px){
-.table-container{display:none;}
-.fee-cards{display:block;}
-}
-
 .mobile-only{display:none;}
 @media(max-width:600px){.mobile-only{display:block;}}
 
-.whatsapp-btn{background:#25D366;}
-.pay-btn{background:#28a745;}
+.whatsapp-btn{
+background:#25D366;
+}
 
-/* FORM UI */
+.pay-btn{
+background:#28a745;
+}
+
+/* spacing fix */
 .form-group{
 margin:15px 0;
 display:flex;
 flex-direction:column;
 }
 
-.form-group label{margin-bottom:5px;font-weight:bold;}
-
-.total-box{
-margin-top:15px;
-padding:12px;
-background:#e8f1ff;
-border-radius:6px;
-display:flex;
-justify-content:space-between;
-font-size:16px;
-}
-
-.total-box.active{
-background:#d4edda;
-color:#155724;
+.form-group label{
+margin-bottom:5px;
 font-weight:bold;
 }
 
-/* Desktop */
 @media(min-width:700px){
 .form-group{
 flex-direction:row;
@@ -152,13 +132,16 @@ border-radius:6px;
 <div>Balance: <span id="feeBalance"></span></div>
 
 <button id="payBalanceBtn" class="pay-btn mobile-only">Pay Now</button>
-<button id="sendScreenshotBalanceBtn" class="whatsapp-btn mobile-only">Send Screenshot</button>
+<button id="sendScreenshotBalanceBtn" class="whatsapp-btn mobile-only">WhatsApp Payment Screenshot</button>
 
 <div class="instructions">
 <b>Important Instructions:</b><br>
-Share payment screenshot with school.<br><br>
+1. Please share the screenshot of the payment with the school, then only the receipt slip will be made.<br>
+2. Please do not share login code with anyone.<br><br>
+
 <b>महत्वपूर्ण निर्देश:</b><br>
-भुगतान का स्क्रीनशॉट स्कूल को भेजें।
+1. कृपया भुगतान का स्क्रीनशॉट स्कूल के साथ साझा करें, तभी रसीद जारी की जाएगी।<br>
+2. कृपया लॉगिन कोड किसी के साथ साझा न करें।
 </div>
 </div>
 
@@ -180,20 +163,22 @@ Share payment screenshot with school.<br><br>
 <select id="calcExamMonths"></select>
 </div>
 
-<div class="total-box" id="totalBox">
-<span>Fees:</span>
+<div class="info">
+<span class="label">Fees to be Paid :</span>
 <span id="calcTotal">₹0</span>
 </div>
 
 <button id="payNowBtn" class="pay-btn mobile-only">Pay Now</button>
-<button id="resetBtn">Reset</button>
-<button id="sendScreenshotCalcBtn" class="whatsapp-btn mobile-only">Send Screenshot</button>
+<button id="sendScreenshotCalcBtn" class="whatsapp-btn mobile-only">WhatsApp Payment Screenshot</button>
 
 <div class="instructions">
 <b>Important Instructions:</b><br>
-Share screenshot after payment.<br><br>
+1. Please share the screenshot of the payment with the school, then only the receipt slip will be made.<br>
+2. Please do not share login code with anyone.<br><br>
+
 <b>महत्वपूर्ण निर्देश:</b><br>
-भुगतान के बाद स्क्रीनशॉट भेजें।
+1. कृपया भुगतान का स्क्रीनशॉट स्कूल के साथ साझा करें, तभी रसीद जारी की जाएगी।<br>
+2. कृपया लॉगिन कोड किसी के साथ साझा न करें।
 </div>
 
 </div>
