@@ -29,32 +29,33 @@ tr:nth-child(even){background:#e8f1ff;}
 .fee-card{border-radius:12px;padding:16px;margin-bottom:15px;box-shadow:0 2px 8px rgba(0,0,0,0.12);}
 .fee-card:nth-child(odd){background:#ffffff;}
 .fee-card:nth-child(even){background:#e8f1ff;}
-@media(max-width:600px){.table-container{display:none;}.fee-cards{display:block;}}
-.mobile-only{display:none;}
-@media(max-width:600px){.mobile-only{display:block;}}
 .logout{text-align:center;margin:20px;}
-.pay-btn{background:#28a745;color:white;padding:10px 20px;font-size:14px;}
+
+/* Buttons */
+#loginBtn{width:230px;padding:12px 0;font-size:16px;background:#0b3d91;color:white;}
+.pay-btn{background:#28a745;color:white;padding:10px 0;font-size:14px;width:100%;border-radius:4px;margin-top:6px;}
 .whatsapp-btn{background:#25D366;color:white;font-size:14px;padding:8px 12px;border-radius:6px;display:inline-block;text-align:center;width:fit-content;margin-top:6px;}  
 
+/* Mobile-only */
+.mobile-only{display:none;}
+@media(max-width:600px){.mobile-only{display:block;} .table-container{display:none;} .fee-cards{display:block;}}
+
 /* Compact calculate section */
-.calc-section{display:flex;flex-direction:column;gap:4px;}
+.calc-section{display:flex;flex-direction:column;gap:4px;margin-top:4px;}
 .calc-section > div{display:flex;flex-direction:column;margin-bottom:4px;}
 .calc-section select{padding:6px;font-size:14px;}
-
-/* Fees to be paid in one line, aligned left */
 .calc-total{margin-top:4px;font-size:15px;font-weight:bold;text-align:left;background:none;padding:0;}
 
-/* Important instructions */
+/* Important instructions for mobile only */
 .instructions, .calc-instructions{
   font-size:14px;line-height:1.4;background:#fff3cd;padding:6px;border-radius:5px;margin-top:4px;
 }
 .instructions b, .calc-instructions b{display:block;margin-bottom:2px;}
-/* Hide calculate fee instructions on desktop */
-@media(min-width:601px){.calc-instructions{display:none;}}
+@media(min-width:601px){.instructions,.calc-instructions{display:none;}}
 </style>
 </head>
-<body>
 
+<body>
 <div class="header">
 <img src="images/logo.png" class="logo">
 <h2>Student Fee Portal</h2>
@@ -140,12 +141,10 @@ tr:nth-child(even){background:#e8f1ff;}
 <label for="calcTuitionMonths">Choose Monthly Tuition Fee Months</label>
 <select id="calcTuitionMonths"></select>
 </div>
-
 <div>
 <label for="calcTransportMonths">Choose Transport Fee Months</label>
 <select id="calcTransportMonths"></select>
 </div>
-
 <div>
 <label for="calcExamMonths">Choose Exam Fee Months</label>
 <select id="calcExamMonths"></select>
