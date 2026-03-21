@@ -35,6 +35,7 @@ async function login() {
         resp = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetID}/values/${masterSheet}?key=${apiKey}`);
         rows = (await resp.json()).values || [];
         let studentClass = "", monthlyTuition = 0, tuitionMonths = 0, transportFees = 0, transportMonths = 0, prevRemain = 0, discount = 0, examFee = 1000;
+
         for (let i = 1; i < rows.length; i++) {
             let r = rows[i]; 
             if (r[1] == admission) {
@@ -49,9 +50,6 @@ async function login() {
                 break;
             }
         }
-
-        // Update Fee Summary exam fee
-document.getElementById("examFee").innerText = "₹" + examFee;
 
         // Populate info
         document.getElementById("studentName").innerText = studentName;
@@ -80,9 +78,11 @@ document.getElementById("examFee").innerText = "₹" + examFee;
             }
         }
 
+        // Total Fee & Balance
         let totalFee = ((monthlyTuition - discount) * tuitionMonths) + (transportFees * transportMonths) + examFee + prevRemain;
         let feeBalance = totalFee - totalPaid;
 
+        // Populate Fee Summary
         document.getElementById("feeTable").innerHTML = table;
         document.getElementById("feeCards").innerHTML = cards;
         document.getElementById("monthlyTuition").innerText = "₹" + monthlyTuition;
@@ -93,6 +93,9 @@ document.getElementById("examFee").innerText = "₹" + examFee;
         document.getElementById("discount").innerText = "₹" + discount;
         document.getElementById("totalPaid").innerText = "₹" + totalPaid;
 
+        // Update Fee Summary Exam Fee dynamically
+        document.getElementById("examFee").innerText = "₹" + examFee;
+
         let bal = document.getElementById("feeBalance");
         bal.innerText = "₹" + feeBalance;
         bal.style.color = feeBalance > 0 ? "red" : "green";
@@ -102,7 +105,7 @@ document.getElementById("examFee").innerText = "₹" + examFee;
         document.getElementById("portal").style.display = "block";
 
         populateFeeSelectors(examFee);
-        setupFeeBalancePayment(examFee);
+        setupFeeBalancePayment();
         setupSendScreenshotButton();
 
     } catch (e) {
@@ -131,10 +134,16 @@ function calculateFees(examFee = 500) {
     const t = parseInt(document.getElementById("calcTuitionMonths").value);
     const tr = parseInt(document.getElementById("calcTransportMonths").value);
     const ex = parseInt(document.getElementById("calcExamMonths").value);
+
     const monthly = parseFloat(document.getElementById("monthlyTuition").innerText.replace("₹", ""));
     const transport = parseFloat(document.getElementById("transportFees").innerText.replace("₹", ""));
     const discount = parseFloat(document.getElementById("discount").innerText.replace("₹", ""));
-    let total = (t * (monthly - discount)) + (tr * transport) + (ex * examFee);
+
+    // Take half of the exam fee for Calculate Fees
+    let examFeePerMonth = examFee / 2;
+
+    let total = (t * (monthly - discount)) + (tr * transport) + (ex * examFeePerMonth);
+
     document.getElementById("calcTotal").innerText = "₹" + total;
 
     document.getElementById("payNowBtn").onclick = () => {
@@ -149,7 +158,7 @@ function calculateFees(examFee = 500) {
     };
 }
 
-function setupFeeBalancePayment(examFee = 500) {
+function setupFeeBalancePayment() {
     const btn = document.getElementById("payBalanceBtn");
     btn.addEventListener("click", () => {
         let text = document.getElementById("feeBalance").innerText.replace(/[^0-9]/g, "");
