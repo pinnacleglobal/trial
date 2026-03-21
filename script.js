@@ -7,6 +7,7 @@ const awSheet = encodeURIComponent("AW");
 
 let globalExamFee = 0;
 
+// --- LOGIN FUNCTION ---
 async function login() {
     const code = document.getElementById("loginCode").value.trim();
     if(!code){ alert("Enter Login Code"); return; }
@@ -167,7 +168,7 @@ function payUPI(amount){
     window.location.href = link;
 }
 
-// --- Setup buttons ---
+// --- Setup Buttons ---
 function setupButtons(){
     // Fee Summary Pay Now
     document.getElementById("payBalanceBtn").onclick = ()=>{
