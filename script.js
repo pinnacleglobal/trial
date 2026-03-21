@@ -50,6 +50,9 @@ async function login() {
             }
         }
 
+        // Update Fee Summary exam fee
+document.getElementById("examFee").innerText = "₹" + examFee;
+
         // Populate info
         document.getElementById("studentName").innerText = studentName;
         document.getElementById("welcomeName").innerText = "Welcome, " + studentName;
