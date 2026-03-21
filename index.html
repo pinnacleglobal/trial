@@ -30,15 +30,20 @@ tr:nth-child(even){background:#e8f1ff;}
 .fee-card:nth-child(odd){background:#ffffff;}
 .fee-card:nth-child(even){background:#e8f1ff;}
 .logout{text-align:center;margin:20px;}
+.logout button{background:#0b3d91;color:white;padding:10px 20px;font-size:16px;}
 
 /* Buttons */
-#loginBtn{width:230px;padding:12px 0;font-size:16px;background:#0b3d91;color:white;}
-.pay-btn{background:#28a745;color:white;padding:10px 0;font-size:14px;width:100%;border-radius:4px;margin-top:6px;}
+#loginBtn{width:150px;padding:12px 0;font-size:16px;background:#0b3d91;color:white;}
+.pay-btn{background:#28a745;color:white;padding:10px 20px;font-size:16px;border-radius:4px;margin-top:6px;text-align:left;display:inline-block;} 
 .whatsapp-btn{background:#25D366;color:white;font-size:14px;padding:8px 12px;border-radius:6px;display:inline-block;text-align:center;width:fit-content;margin-top:6px;}  
 
 /* Mobile-only */
 .mobile-only{display:none;}
-@media(max-width:600px){.mobile-only{display:block;} .table-container{display:none;} .fee-cards{display:block;}}
+@media(max-width:600px){
+  .mobile-only{display:block;}
+  .table-container{display:none;}
+  .fee-cards{display:block;}
+}
 
 /* Compact calculate section */
 .calc-section{display:flex;flex-direction:column;gap:4px;margin-top:4px;}
