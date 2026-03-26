@@ -190,6 +190,7 @@ font-size:16px;
 margin-top:10px;
 }
 
+/* Mobile-friendly WhatsApp buttons */
 .whatsapp-btn{
 background:#25D366 !important;
 color:white !important;
@@ -227,17 +228,140 @@ Loading Student Data...
 </div>
 
 <div id="portal" style="display:none">
-<!-- (ALL YOUR EXISTING HTML CONTENT REMAINS EXACTLY SAME) -->
-<!-- I am not repeating here to save space — it's unchanged -->
+
+<div class="profile" style="text-align:center;background:#0b3d91;color:white;">
+<h2 id="welcomeName"></h2>
 </div>
 
-<script>
-// ================== SCRIPT.JS CODE ==================
+<div class="section-title">Student Details</div>
 
-const sheetID = "1Sy5uBZkjKpGnLdZp2sFuhFORhO1fRqCswfNYHRl73PM";
+<div class="profile">
+<div class="info"><span class="label">Student Name :</span> <span id="studentName"></span></div>
+<div class="info"><span class="label">Admission Number :</span> <span id="adm"></span></div>
+<div class="info"><span class="label">Class :</span> <span id="class"></span></div>
+<div class="info"><span class="label">Father's Name :</span> <span id="father"></span></div>
+<div class="info"><span class="label">Mother's Name :</span> <span id="mother"></span></div>
+<div class="info"><span class="label">Phone Number :</span> <span id="phone"></span></div>
+<div class="info"><span class="label">Address :</span> <span id="address"></span></div>
+</div>
+
+<div class="section-title">Paid Fee Details</div>
+
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>Date</th>
+<th>Slip Number</th>
+<th>Amount Paid</th>
+<th>Fee Type</th>
+<th>Session</th>
+<th>Tuition Fee Months</th>
+<th>Transport Fee Months</th>
+<th>Exam Fee Months</th>
+<th>Payment Mode</th>
+</tr>
+</thead>
+<tbody id="feeTable"></tbody>
+</table>
+</div>
+
+<div class="fee-cards" id="feeCards"></div>
+
+<div class="section-title">Fee Structure</div>
+
+<div class="profile">
+<div class="info"><span class="label">Monthly Tuition Fees :</span> <span id="monthlyTuition"></span></div>
+<div class="info"><span class="label">Tuition Fees for Months :</span> <span id="tuitionMonths"></span></div>
+<div class="info"><span class="label">Transport Fees :</span> <span id="transportFees"></span></div>
+<div class="info"><span class="label">Transport Fees Months :</span> <span id="transportMonths"></span></div>
+<div class="info"><span class="label">Exam Fee :</span> <span id="examFee"></span></div>
+<div class="info"><span class="label">Previous Year Fee Remain :</span> <span id="prevRemain"></span></div>
+<div class="info"><span class="label">Discount :</span> <span id="discount"></span></div>
+</div>
+
+<div class="section-title">Fee Summary</div>
+
+<div class="profile">
+
+<div class="info"><span class="label">Total Fees Paid in Current Session :</span> <span id="totalPaid"></span></div>
+<div class="info"><span class="label">Fee Balance :</span> <span id="feeBalance"></span></div>
+
+<div class="info">
+<button id="payBalanceBtn" class="pay-btn mobile-only">Pay Now</button>
+</div>
+<div class="info">
+<button id="sendScreenshotBalanceBtn" class="whatsapp-btn mobile-only">Send Payment Screenshot to WhatsApp</button>
+</div>
+
+<div class="instructions">
+<b>Important Instructions:</b><br>
+1. Please share the screenshot of the payment with the school, then only the receipt slip will be made.<br>
+2. Please do not share login code with anyone.<br><br>
+
+<b>महत्वपूर्ण निर्देश:</b><br>
+1. कृपया भुगतान का स्क्रीनशॉट स्कूल के साथ साझा करें, तभी रसीद जारी की जाएगी।<br>
+2. कृपया लॉगिन कोड किसी के साथ साझा न करें।
+</div>
+
+</div>
+
+<div class="section-title">Calculate Fees</div>
+
+<div class="profile">
+
+<div class="info">
+<label class="label">Choose Monthly Tuition Fee Months :</label>
+<select id="calcTuitionMonths"></select>
+</div>
+
+<div class="info">
+<label class="label">Choose Transport Fee Months :</label>
+<select id="calcTransportMonths"></select>
+</div>
+
+<div class="info">
+<label class="label">Choose Exam Fee Months :</label>
+<select id="calcExamMonths"></select>
+</div>
+
+<div class="info">
+<label class="label">Fees to be Paid :</label>
+<span id="calcTotal">₹0</span>
+</div>
+
+<div class="info">
+<button id="payNowBtn" class="pay-btn mobile-only">Pay Now</button>
+</div>
+<div class="info">
+<button id="sendScreenshotCalcBtn" class="whatsapp-btn mobile-only">Send Payment Screenshot to WhatsApp</button>
+</div>
+
+<div class="instructions">
+<b>Important Instructions:</b><br>
+1. Please share the screenshot of the payment with the school, then only the receipt slip will be made.<br>
+2. Please do not share login code with anyone.<br><br>
+
+<b>महत्वपूर्ण निर्देश:</b><br>
+1. कृपया भुगतान का स्क्रीनशॉट स्कूल के साथ साझा करें, तभी रसीद जारी की जाएगी।<br>
+2. कृपया लॉगिन कोड किसी के साथ साझा न करें.
+</div>
+
+</div>
+
+<div class="logout">
+<button onclick="logout()">Logout</button>
+</div>
+
+</div>
+
+
+</body>
+
+const sheetID = "1Sy5uBZkjKpGnLdZp2sFuhFORhO1fRqCswfNYHRl73PM"; // Updated Sheet ID
 const apiKey = "AIzaSyB5VIy4kIySW7bVrjNYMpL5rkqZ7Oe758E";
 
-const masterSheet = encodeURIComponent("Master Data 2026");
+const masterSheet = encodeURIComponent("Master Data 2026"); // Updated sheet name
 const feesSheet = encodeURIComponent("Fees Collection");
 const awSheet = encodeURIComponent("AW");
 
@@ -249,6 +373,7 @@ async function login() {
     document.getElementById("loader").style.display = "block";
 
     try {
+        // AW Sheet
         let resp = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetID}/values/${awSheet}?key=${apiKey}`);
         let rows = (await resp.json()).values || [];
         let admission = "", studentName = "", father = "", mother = "", phone = "", address = "";
@@ -266,6 +391,7 @@ async function login() {
         if (loginBlocked) { alert("You Cannot Login As You Have Left The School. Please Contact The School."); location.reload(); return; }
         if (!admission) { alert("Invalid Login Code"); location.reload(); return; }
 
+        // Master Data
         resp = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetID}/values/${masterSheet}?key=${apiKey}`);
         rows = (await resp.json()).values || [];
         let studentClass = "", monthlyTuition = 0, tuitionMonths = 0, transportFees = 0, transportMonths = 0, prevRemain = 0, discount = 0, examFee = 1000;
@@ -273,18 +399,19 @@ async function login() {
         for (let i = 1; i < rows.length; i++) {
             let r = rows[i]; 
             if (r[1] == admission) {
-                studentClass = r[14] || "";
+                studentClass = r[14] || ""; // Column O for class
                 monthlyTuition = parseFloat(r[4]) || 0; 
                 prevRemain = parseFloat(r[3]) || 0;
                 discount = parseFloat(r[5]) || 0; 
                 tuitionMonths = parseFloat(r[6]) || 0;
                 transportFees = parseFloat(r[7]) || 0; 
                 transportMonths = parseFloat(r[8]) || 0;
-                examFee = parseFloat(r[9]) || 1000;
+                examFee = parseFloat(r[9]) || 1000; // Column J for exam fee
                 break;
             }
         }
 
+        // Populate info
         document.getElementById("studentName").innerText = studentName;
         document.getElementById("welcomeName").innerText = "Welcome, " + studentName;
         document.getElementById("class").innerText = studentClass;
@@ -294,6 +421,7 @@ async function login() {
         document.getElementById("phone").innerText = phone;
         document.getElementById("address").innerText = address;
 
+        // Fees Collection
         resp = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetID}/values/${feesSheet}?key=${apiKey}`);
         rows = (await resp.json()).values || [];
         let table = "", cards = "", totalPaid = 0;
@@ -310,9 +438,11 @@ async function login() {
             }
         }
 
+        // Total Fee & Balance
         let totalFee = ((monthlyTuition - discount) * tuitionMonths) + (transportFees * transportMonths) + examFee + prevRemain;
         let feeBalance = totalFee - totalPaid;
 
+        // Populate Fee Summary
         document.getElementById("feeTable").innerHTML = table;
         document.getElementById("feeCards").innerHTML = cards;
         document.getElementById("monthlyTuition").innerText = "₹" + monthlyTuition;
@@ -322,6 +452,8 @@ async function login() {
         document.getElementById("prevRemain").innerText = "₹" + prevRemain;
         document.getElementById("discount").innerText = "₹" + discount;
         document.getElementById("totalPaid").innerText = "₹" + totalPaid;
+
+        // Update Fee Summary Exam Fee dynamically
         document.getElementById("examFee").innerText = "₹" + examFee;
 
         let bal = document.getElementById("feeBalance");
@@ -367,7 +499,9 @@ function calculateFees(examFee = 500) {
     const transport = parseFloat(document.getElementById("transportFees").innerText.replace("₹", ""));
     const discount = parseFloat(document.getElementById("discount").innerText.replace("₹", ""));
 
+    // Take half of the exam fee for Calculate Fees
     let examFeePerMonth = examFee / 2;
+
     let total = (t * (monthly - discount)) + (tr * transport) + (ex * examFeePerMonth);
 
     document.getElementById("calcTotal").innerText = "₹" + total;
@@ -390,7 +524,12 @@ function setupFeeBalancePayment() {
         let text = document.getElementById("feeBalance").innerText.replace(/[^0-9]/g, "");
         let amount = parseFloat(text);
         if (amount <= 0) { alert("No balance to pay"); return; }
-        const link = `upi://pay?pa=pinnacleglobalschool.62697340@hdfcbank&pn=Pinnacle Global School&am=${amount}&cu=INR`;
+        const upi = "pinnacleglobalschool.62697340@hdfcbank";
+        const adm = document.getElementById("adm").innerText.trim();
+        const name = document.getElementById("studentName").innerText.trim();
+        const cls = document.getElementById("class").innerText.trim();
+        const note = `${adm} ${name} ${cls} FEE`;
+        const link = `upi://pay?pa=${upi}&pn=Pinnacle Global School&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;
         window.location.href = link;
     });
 }
@@ -420,7 +559,4 @@ document.addEventListener("DOMContentLoaded", () => {
         if (e.key === "Enter") login();
     });
 });
-</script>
-
-</body>
 </html>
