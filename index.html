@@ -13,29 +13,24 @@ margin:0;
 background:#f2f5ff;
 }
 
+/* HEADER FIXED */
 .header{
 background:#0b3d91;
 text-align:center;
-padding:20px;
+padding:15px 10px;
 color:white;
 }
 
-/* IMPROVED LOGO */
-.logo-box{
-display:inline-flex;
-align-items:center;
-justify-content:center;
-background:linear-gradient(145deg,#eef6ff,#dcecff);
-padding:18px;
-border-radius:18px;
-box-shadow:0 6px 14px rgba(0,0,0,0.1);
-margin-bottom:12px;
-}
-
+/* LOGO FIX */
 .logo{
-width:110px;
+width:90px;
 height:auto;
-object-fit:contain;
+display:block;
+margin:0 auto 10px auto;
+background:white;
+padding:6px;
+border-radius:10px;
+box-shadow:0 2px 6px rgba(0,0,0,0.2);
 }
 
 .login-box{
@@ -48,7 +43,7 @@ padding:12px;
 width:230px;
 font-size:16px;
 border:1px solid #ccc;
-border-radius:6px;
+border-radius:4px;
 }
 
 button{
@@ -57,7 +52,7 @@ font-size:16px;
 background:#0b3d91;
 color:white;
 border:none;
-border-radius:6px;
+border-radius:4px;
 cursor:pointer;
 }
 
@@ -98,8 +93,8 @@ text-align:left;
 background:white;
 margin:15px;
 padding:20px;
-border-radius:12px;
-box-shadow:0 3px 10px rgba(0,0,0,0.12);
+border-radius:10px;
+box-shadow:0 2px 6px rgba(0,0,0,0.1);
 }
 
 .info{
@@ -149,16 +144,58 @@ margin-bottom:15px;
 box-shadow:0 2px 8px rgba(0,0,0,0.12);
 }
 
-.fee-card:nth-child(odd){background:#ffffff;}
-.fee-card:nth-child(even){background:#e8f1ff;}
+.fee-card:nth-child(odd){
+background:#ffffff;
+}
+
+.fee-card:nth-child(even){
+background:#e8f1ff;
+}
 
 @media(max-width:600px){
 .table-container{display:none;}
 .fee-cards{display:block;}
 }
 
+.mobile-only{
+display:none;
+}
+
+@media(max-width:600px){
+.mobile-only{
+display:block;
+}
+}
+
+.instructions{
+display:none;
+}
+
+@media(max-width:600px){
+.instructions{
+display:block;
+margin-top:15px;
+font-size:14px;
+background:#fff3cd;
+padding:12px;
+border-radius:6px;
+}
+}
+
+.logout{
+text-align:center;
+margin:20px;
+}
+
 .pay-btn{
 background:#28a745;
+color:white;
+border:none;
+padding:12px 25px;
+border-radius:4px;
+cursor:pointer;
+font-size:16px;
+margin-top:10px;
 }
 
 .whatsapp-btn{
@@ -167,12 +204,10 @@ color:white !important;
 font-size:14px !important;
 padding:8px 12px !important;
 border-radius:6px !important;
+border:none;
 margin-top:5px;
-}
-
-.logout{
-text-align:center;
-margin:20px;
+display:inline-block;
+cursor:pointer;
 }
 </style>
 </head>
@@ -180,9 +215,7 @@ margin:20px;
 <body>
 
 <div class="header">
-<div class="logo-box">
 <img src="images/logo.png" class="logo">
-</div>
 <h2>Student Fee Portal</h2>
 </div>
 
@@ -195,15 +228,13 @@ margin:20px;
 
 <div class="loader" id="loader">
 <div class="spinner"></div>
-<br>Loading Student Data...
+<br>
+Loading Student Data...
 </div>
 
 <div id="portal" style="display:none">
 
 <div class="profile" style="text-align:center;background:#0b3d91;color:white;">
-<div class="logo-box">
-<img src="images/logo.png" class="logo">
-</div>
 <h2 id="welcomeName"></h2>
 </div>
 
@@ -225,15 +256,8 @@ margin:20px;
 <table>
 <thead>
 <tr>
-<th>Date</th>
-<th>Slip Number</th>
-<th>Amount Paid</th>
-<th>Fee Type</th>
-<th>Session</th>
-<th>Tuition Fee Months</th>
-<th>Transport Fee Months</th>
-<th>Exam Fee Months</th>
-<th>Payment Mode</th>
+<th>Date</th><th>Slip</th><th>Amount</th><th>Type</th><th>Session</th>
+<th>T Months</th><th>TR Months</th><th>EX Months</th><th>Mode</th>
 </tr>
 </thead>
 <tbody id="feeTable"></tbody>
@@ -242,138 +266,77 @@ margin:20px;
 
 <div class="fee-cards" id="feeCards"></div>
 
-<div class="section-title">Fee Structure</div>
-
-<div class="profile">
-<div class="info"><span class="label">Monthly Tuition Fees :</span> <span id="monthlyTuition"></span></div>
-<div class="info"><span class="label">Tuition Fees for Months :</span> <span id="tuitionMonths"></span></div>
-<div class="info"><span class="label">Transport Fees :</span> <span id="transportFees"></span></div>
-<div class="info"><span class="label">Transport Fees Months :</span> <span id="transportMonths"></span></div>
-<div class="info"><span class="label">Exam Fee :</span> <span id="examFee"></span></div>
-<div class="info"><span class="label">Previous Year Fee Remain :</span> <span id="prevRemain"></span></div>
-<div class="info"><span class="label">Discount :</span> <span id="discount"></span></div>
-</div>
-
 <div class="section-title">Fee Summary</div>
 
 <div class="profile">
-<div class="info"><span class="label">Total Fees Paid in Current Session :</span> <span id="totalPaid"></span></div>
-<div class="info"><span class="label">Fee Balance :</span> <span id="feeBalance"></span></div>
+<div class="info"><span class="label">Total Paid :</span> <span id="totalPaid"></span></div>
+<div class="info"><span class="label">Balance :</span> <span id="feeBalance"></span></div>
 
-<button id="payBalanceBtn" class="pay-btn">Pay Now</button>
-<button id="sendScreenshotBalanceBtn" class="whatsapp-btn">Send Screenshot to WhatsApp</button>
-</div>
-
-<div class="section-title">Calculate Fees</div>
-
-<div class="profile">
-
-<div class="info">
-<label class="label">Choose Monthly Tuition Fee Months :</label>
-<select id="calcTuitionMonths"></select>
-</div>
-
-<div class="info">
-<label class="label">Choose Transport Fee Months :</label>
-<select id="calcTransportMonths"></select>
-</div>
-
-<div class="info">
-<label class="label">Choose Exam Fee Months :</label>
-<select id="calcExamMonths"></select>
-</div>
-
-<div class="info">
-<label class="label">Fees to be Paid :</label>
-<span id="calcTotal">₹0</span>
-</div>
-
-<button id="payNowBtn" class="pay-btn">Pay Now</button>
-<button id="sendScreenshotCalcBtn" class="whatsapp-btn">Send Screenshot</button>
-
+<button id="payBalanceBtn" class="pay-btn mobile-only">Pay Now</button>
+<button id="sendScreenshotBalanceBtn" class="whatsapp-btn mobile-only">Send Screenshot</button>
 </div>
 
 <div class="logout">
-<button onclick="logout()">Logout</button>
+<button onclick="location.reload()">Logout</button>
 </div>
 
 </div>
 
 <script>
-const sheetID="1Sy5uBZkjKpGnLdZp2sFuhFORhO1fRqCswfNYHRl73PM";
-const apiKey="AIzaSyB5VIy4kIySW7bVrjNYMpL5rkqZ7Oe758E";
+const sheetID = "1Sy5uBZkjKpGnLdZp2sFuhFORhO1fRqCswfNYHRl73PM";
+const apiKey = "AIzaSyB5VIy4kIySW7bVrjNYMpL5rkqZ7Oe758E";
 
-const masterSheet=encodeURIComponent("Master Data 2026");
-const feesSheet=encodeURIComponent("Fees Collection");
-const awSheet=encodeURIComponent("AW");
+const masterSheet = encodeURIComponent("Master Data 2026");
+const feesSheet = encodeURIComponent("Fees Collection");
+const awSheet = encodeURIComponent("AW");
 
 async function login(){
 const code=document.getElementById("loginCode").value.trim();
 if(!code){alert("Enter Login Code");return;}
 
-document.getElementById("loginBtn").disabled=true;
 document.getElementById("loader").style.display="block";
 
-try{
 let resp=await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetID}/values/${awSheet}?key=${apiKey}`);
 let rows=(await resp.json()).values||[];
 
-let admission="",studentName="",father="",mother="",phone="",address="";
+let admission="",name="";
 for(let i=1;i<rows.length;i++){
-let r=rows[i];
-if(r[29]&&r[29].trim()==code){
-admission=r[1]||""; studentName=r[3]||""; father=r[6]||"";
-mother=r[5]||""; phone=r[22]||""; address=r[7]||""; break;
-}
-}
-
-if(!admission){alert("Invalid Login Code");location.reload();return;}
-
-resp=await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetID}/values/${masterSheet}?key=${apiKey}`);
-rows=(await resp.json()).values||[];
-
-let studentClass="",monthlyTuition=0,transportFees=0,transportMonths=0,prevRemain=0,discount=0,examFee=1000;
-
-for(let i=1;i<rows.length;i++){
-let r=rows[i];
-if(r[1]==admission){
-studentClass=r[14]||"";
-monthlyTuition=parseFloat(r[4])||0;
-prevRemain=parseFloat(r[3])||0;
-discount=parseFloat(r[5])||0;
-transportFees=parseFloat(r[7])||0;
-transportMonths=parseFloat(r[8])||0;
-examFee=parseFloat(r[9])||1000;
+if(rows[i][29]==code){
+admission=rows[i][1];
+name=rows[i][3];
 break;
 }
 }
 
-document.getElementById("studentName").innerText=studentName;
-document.getElementById("welcomeName").innerText="Welcome, "+studentName;
-document.getElementById("class").innerText=studentClass;
-document.getElementById("adm").innerText=admission;
-document.getElementById("father").innerText=father;
-document.getElementById("mother").innerText=mother;
-document.getElementById("phone").innerText=phone;
-document.getElementById("address").innerText=address;
+if(!admission){alert("Invalid Code");location.reload();return;}
 
-document.getElementById("monthlyTuition").innerText="₹"+monthlyTuition;
-document.getElementById("transportFees").innerText="₹"+transportFees;
-document.getElementById("transportMonths").innerText=transportMonths;
-document.getElementById("prevRemain").innerText="₹"+prevRemain;
-document.getElementById("discount").innerText="₹"+discount;
-document.getElementById("examFee").innerText="₹"+examFee;
+document.getElementById("studentName").innerText=name;
+document.getElementById("welcomeName").innerText="Welcome "+name;
+document.getElementById("adm").innerText=admission;
+
+resp=await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetID}/values/${feesSheet}?key=${apiKey}`);
+rows=(await resp.json()).values||[];
+
+let table="",total=0;
+
+for(let i=1;i<rows.length;i++){
+if(rows[i][2]==admission){
+let amt=parseFloat(rows[i][5])||0;
+total+=amt;
+table+=`<tr><td>${rows[i][1]}</td><td>${rows[i][0]}</td><td>₹${amt}</td><td>${rows[i][6]}</td><td>${rows[i][7]}</td><td>${rows[i][8]}</td><td>${rows[i][9]}</td><td>${rows[i][10]}</td><td>${rows[i][11]}</td></tr>`;
+}
+}
+
+document.getElementById("feeTable").innerHTML=table;
+document.getElementById("totalPaid").innerText="₹"+total;
+document.getElementById("feeBalance").innerText="₹0";
 
 document.getElementById("loginBox").style.display="none";
 document.getElementById("loader").style.display="none";
 document.getElementById("portal").style.display="block";
-
-}catch(e){console.error(e);}
 }
 
-function logout(){location.reload();}
-
-document.getElementById("loginBtn").addEventListener("click",login);
+document.getElementById("loginBtn").onclick=login;
 </script>
 
 </body>
