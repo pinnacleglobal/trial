@@ -23,14 +23,16 @@ color:white;
 .logo{
     width: 140px;
     margin-bottom: 10px;
-    /* subtle shadow around logo borders */
-    filter: drop-shadow(0 3px 6px rgba(0,0,0,0.35));
+    /* soft white glow around the logo */
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.7))
+            drop-shadow(0 0 12px rgba(255, 255, 255, 0.5));
     transition: filter 0.3s ease;
 }
 
-/* Optional: Slight hover effect for premium feel */
+/* Optional: stronger glow on hover */
 .logo:hover{
-    filter: drop-shadow(0 5px 10px rgba(0,0,0,0.4));
+    filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.8))
+            drop-shadow(0 0 16px rgba(255, 255, 255, 0.6));
 }
 
 .login-box{
