@@ -214,9 +214,41 @@ width:fit-content;
 
 <body>
 
-<div class="header">
+<div class="header" style="position:relative;">
 <img src="images/logo.png" class="logo">
 <h2>Student Portal</h2>
+
+<!-- Notification Bulb -->
+<div id="notificationIcon" style="position:absolute; top:15px; right:20px; cursor:pointer; display:none;">
+  💡
+  <span id="notificationBadge" style="
+    position:absolute;
+    top:-5px;
+    right:-8px;
+    background:red;
+    color:white;
+    font-size:10px;
+    padding:2px 5px;
+    border-radius:50%;
+    display:none;
+  ">1</span>
+</div>
+</div>
+
+<div id="notificationBox" style="
+display:none;
+position:fixed;
+top:80px;
+right:20px;
+background:white;
+padding:15px;
+border-radius:10px;
+box-shadow:0 4px 10px rgba(0,0,0,0.2);
+max-width:300px;
+z-index:1000;
+font-size:14px;
+">
+<span id="notificationText">No Notification Yet</span>
 </div>
 
 <div class="login-box" id="loginBox">
