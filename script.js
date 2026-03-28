@@ -161,6 +161,7 @@ icon.style.display = "block";
 // Set badge
 if (showBadge) {
     badge.style.display = "inline-block";
+    icon.style.animation = "glow 1s infinite";
 } else {
     badge.style.display = "none";
 }
