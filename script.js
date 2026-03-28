@@ -265,3 +265,12 @@ document.addEventListener("DOMContentLoaded", () => {
         if (e.key === "Enter") login();
     });
 });
+
+document.addEventListener("click", function(e) {
+    const icon = document.getElementById("notificationIcon");
+    const box = document.getElementById("notificationBox");
+
+    if (!icon.contains(e.target) && !box.contains(e.target)) {
+        box.style.display = "none";
+    }
+});
