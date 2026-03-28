@@ -4,6 +4,7 @@ const apiKey = "AIzaSyB5VIy4kIySW7bVrjNYMpL5rkqZ7Oe758E";
 const masterSheet = encodeURIComponent("Master Data 2026"); // Updated sheet name
 const feesSheet = encodeURIComponent("Fees Collection");
 const awSheet = encodeURIComponent("AW");
+const noticeSheet = encodeURIComponent("DS n Notice");
 
 async function login() {
     const code = document.getElementById("loginCode").value.trim();
@@ -106,7 +107,27 @@ if (photoUrl && photoUrl.trim() !== "") {
                 cards += `<div class="fee-card"><div><b>Date:</b> ${date}</div><div><b>Slip Number:</b> ${slip}</div><div><b>Amount Paid:</b> ₹${amount}</div><div><b>Fee Type:</b> ${feeType}</div><div><b>Session:</b> ${session}</div><div><b>Tuition Fee Months:</b> ${tMonths}</div><div><b>Transport Fee Months:</b> ${trMonths}</div><div><b>Exam Fee Months:</b> ${exMonths}</div><div><b>Payment Mode:</b> ${mode}</div></div>`;
             }
         }
+// 4A. Fetch Notification
+let notificationMessage = "No Notification Yet";
+let showBadge = false;
 
+try {
+    let noticeResp = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetID}/values/${noticeSheet}!J20:K21?key=${apiKey}`);
+    let noticeData = (await noticeResp.json()).values || [];
+
+    if (noticeData.length > 0) {
+        let row = noticeData[0];
+        let message = noticeData[1][0]; // J21
+let status = noticeData[0][1];  // K20
+
+        if (status.toLowerCase() === "publish") {
+            notificationMessage = message || "New Notification";
+            showBadge = true;
+        }
+    }
+} catch (e) {
+    console.log("Notification fetch error", e);
+}
         // 5. Final Calculation & Display
         let totalFee = ((monthlyTuition - discount) * tuitionMonths) + (transportFees * transportMonths) + examFee + prevRemain;
         let feeBalance = totalFee - totalPaid;
@@ -129,7 +150,26 @@ if (photoUrl && photoUrl.trim() !== "") {
         document.getElementById("loginBox").style.display = "none";
         document.getElementById("loader").style.display = "none";
         document.getElementById("portal").style.display = "block";
+// Show notification icon
+const icon = document.getElementById("notificationIcon");
+const badge = document.getElementById("notificationBadge");
+const box = document.getElementById("notificationBox");
+const text = document.getElementById("notificationText");
 
+icon.style.display = "block";
+
+// Set badge
+if (showBadge) {
+    badge.style.display = "inline-block";
+} else {
+    badge.style.display = "none";
+}
+
+// Click event
+icon.onclick = () => {
+    box.style.display = (box.style.display === "block") ? "none" : "block";
+    text.innerText = showBadge ? notificationMessage : "No Notification Yet";
+};
         populateFeeSelectors(examFee);
         setupFeeBalancePayment();
         setupSendScreenshotButton();
