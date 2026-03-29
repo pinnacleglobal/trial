@@ -175,6 +175,91 @@ icon.onclick = () => {
         setupFeeBalancePayment();
         setupSendScreenshotButton();
 
+// ===== DATE SHEET FETCH =====
+try {
+    let dsResp = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetID}/values/${noticeSheet}?key=${apiKey}`);
+    let dsData = (await dsResp.json()).values || [];
+
+    let publishStatus = (dsData[13] && dsData[13][10]) ? dsData[13][10].toLowerCase() : ""; // K14
+    if (publishStatus === "publish") {
+
+        document.getElementById("dateSheetSection").style.display = "block";
+
+        let examTitle = dsData[0][1] || "";   // B1
+        let session = dsData[0][5] || "";     // F1
+
+        let studentClass = document.getElementById("class").innerText.trim();
+
+        // Find class column (Row 2, B to P)
+        let classRow = dsData[1] || [];
+        let classColIndex = -1;
+
+        for (let i = 1; i <= 15; i++) {
+            if (classRow[i] && classRow[i].toString().trim().toLowerCase() === studentClass.toLowerCase()) {
+                classColIndex = i;
+                break;
+            }
+        }
+
+        let html = `<h3 style="text-align:center;">${examTitle}</h3>
+                    <div style="text-align:center; margin-bottom:10px;"><b>Session :</b> ${session}</div>`;
+
+        if (classColIndex !== -1) {
+
+            html += `<table>
+                        <tr><th>Date</th><th>Subject</th></tr>`;
+
+            // ===== CASE 1: PT Exams =====
+            if (examTitle.includes("PT")) {
+
+                for (let i = 6; i <= 11; i++) { // Rows 7–12
+                    let date = dsData[i][0] || "";
+                    let subject = dsData[i][classColIndex] || "";
+
+                    if (date || subject) {
+                        html += `<tr><td>${date}</td><td>${subject}</td></tr>`;
+                    }
+                }
+            }
+
+            // ===== CASE 2: Half Yearly / Annual =====
+            else {
+
+                // Minor Exams
+                html += `<tr><th colspan="2">Minor Exams</th></tr>`;
+                for (let i = 3; i <= 4; i++) { // Rows 4–5
+                    let date = dsData[i][0] || "";
+                    let subject = dsData[i][classColIndex] || "";
+
+                    if (date || subject) {
+                        html += `<tr><td>${date}</td><td>${subject}</td></tr>`;
+                    }
+                }
+
+                // Major Exams
+                html += `<tr><th colspan="2">Major Exams</th></tr>`;
+                for (let i = 6; i <= 11; i++) { // Rows 7–12
+                    let date = dsData[i][0] || "";
+                    let subject = dsData[i][classColIndex] || "";
+
+                    if (date || subject) {
+                        html += `<tr><td>${date}</td><td>${subject}</td></tr>`;
+                    }
+                }
+            }
+
+            html += `</table>`;
+        } else {
+            html += `<div style="text-align:center;">No Date Sheet Available</div>`;
+        }
+
+        document.getElementById("dateSheetContent").innerHTML = html;
+    }
+
+} catch (e) {
+    console.log("Date Sheet error", e);
+}
+
     } catch (e) {
         console.error(e);
         alert("An error occurred during login. Check console for details.");
