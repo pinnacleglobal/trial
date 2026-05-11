@@ -1,362 +1,294 @@
-const sheetID = "1Sy5uBZkjKpGnLdZp2sFuhFORhO1fRqCswfNYHRl73PM"; // Updated Sheet ID
+const sheetID = "1Sy5uBZkjKpGnLdZp2sFuhFORhO1fRqCswfNYHRl73PM";
 const apiKey = "AIzaSyB5VIy4kIySW7bVrjNYMpL5rkqZ7Oe758E";
 
-const masterSheet = encodeURIComponent("Master Data 2026"); // Updated sheet name
-const feesSheet = encodeURIComponent("Fees Collection");
-const awSheet = encodeURIComponent("AW");
-const noticeSheet = encodeURIComponent("DS n Notice");
+const sheets = {
+    master: encodeURIComponent("Master Data 2026"),
+    fees: encodeURIComponent("Fees Collection"),
+    aw: encodeURIComponent("AW"),
+    ds: encodeURIComponent("DS n Notice"),
+    att: encodeURIComponent("Attendance")
+};
 
-async function login() {
-    const code = document.getElementById("loginCode").value.trim();
-    if (!code) { alert("Enter Login Code"); return; }
+let originalDiscount = 0;
+let globalNotification = "No notification to show";
+let deferredPrompt;
 
-    document.getElementById("loginBtn").disabled = true;
-    document.getElementById("loader").style.display = "block";
+document.addEventListener("DOMContentLoaded", () => {
+    const savedCode = localStorage.getItem("portalLoginCode");
+    const savedView = localStorage.getItem("currentView") || "view-dashboard";
+    if (savedCode) {
+        login(true, savedView);
+    } else {
+        document.getElementById("loader").style.display = "none";
+        document.getElementById("loginBox").style.display = "block";
+    }
+
+    window.onpopstate = function() {
+        if (document.getElementById("portal").style.display === "block") {
+            const current = getCurrentVisibleView();
+            if (current !== 'view-dashboard') showView('view-dashboard', true);
+        }
+    };
+});
+
+async function login(isAuto = false, targetView = 'view-dashboard') {
+    const loginBox = document.getElementById("loginBox");
+    const loader = document.getElementById("loader");
+    const portal = document.getElementById("portal");
+    const code = isAuto ? localStorage.getItem("portalLoginCode") : document.getElementById("loginCode").value.trim();
+
+    if (!code) {
+        loader.style.display = "none";
+        loginBox.style.display = "block";
+        return;
+    }
+
+    loginBox.style.display = "none";
+    loader.style.display = "block";
 
     try {
-        // 1. Fetch AW Sheet Data
-        let resp = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetID}/values/${awSheet}?key=${apiKey}`);
-        let rows = (await resp.json()).values || [];
-        let admission = "", studentName = "", father = "", mother = "", phone = "", address = "", photoUrl = "";
-        let loginBlocked = false;
+        // PRIORITY FETCH: Get basic student info and notices first
+        const priorityUrls = [
+            `https://sheets.googleapis.com/v4/spreadsheets/${sheetID}/values/${sheets.aw}?key=${apiKey}`,
+            `https://sheets.googleapis.com/v4/spreadsheets/${sheetID}/values/${sheets.master}?key=${apiKey}`,
+            `https://sheets.googleapis.com/v4/spreadsheets/${sheetID}/values/${sheets.ds}?key=${apiKey}`
+        ];
 
-        for (let i = 1; i < rows.length; i++) {
-            let r = rows[i];
-            if (r[29] && r[29].trim() == code) {
-                if (r[31] && r[31].toUpperCase() == "TRUE") { loginBlocked = true; break; }
-                admission = r[1] || ""; 
-                studentName = r[3] || ""; 
-                father = r[6] || "";
-                mother = r[5] || ""; 
-                phone = r[22] || ""; 
-                address = r[7] || ""; 
-                photoUrl = r[28] || ""; // Column AC
-                break;
-            }
+        const pResponses = await Promise.all(priorityUrls.map(url => fetch(url)));
+        const pData = await Promise.all(pResponses.map(res => res.json()));
+
+        const student = pData[0].values.find(r => r[29] && r[29].trim() === code);
+        if (!student) {
+            if (!isAuto) alert("Invalid Login Code");
+            logout(); return;
         }
 
-        if (loginBlocked) { alert("You Cannot Login As You Have Left The School."); location.reload(); return; }
-        if (!admission) { alert("Invalid Login Code"); location.reload(); return; }
+        const mRow = pData[1].values.find(r => r[1] == student[1]);
+        if (!mRow) { alert("Data Not Found. Contact School Admin"); logout(); return; }
 
-        // 2. Fetch Master Data
-        resp = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetID}/values/${masterSheet}?key=${apiKey}`);
-        rows = (await resp.json()).values || [];
-        let studentClass = "", monthlyTuition = 0, tuitionMonths = 0, transportFees = 0, transportMonths = 0, prevRemain = 0, discount = 0, examFee = 1000;
+        localStorage.setItem("portalLoginCode", code);
+        // --- ADD THIS LINE HERE ---
+if (typeof gtag === 'function') gtag('event', 'login', { 'method': isAuto ? 'Auto_Login' : 'Manual_Login' });
+// --------------------------
+        // Render Dashboard Immediately
+        handlePermissions(pData[2].values);
+        populateStudentProfile(student, mRow);
+        setupDateSheet(pData[2].values, mRow[14]);
 
-        for (let i = 1; i < rows.length; i++) {
-            let r = rows[i]; 
-            if (r[1] == admission) {
-                studentClass = r[14] || "";
-                monthlyTuition = parseFloat(r[4]) || 0; 
-                prevRemain = parseFloat(r[3]) || 0;
-                discount = parseFloat(r[5]) || 0; 
-                tuitionMonths = parseFloat(r[6]) || 0;
-                transportFees = parseFloat(r[7]) || 0; 
-                transportMonths = parseFloat(r[8]) || 0;
-                examFee = parseFloat(r[9]) || 1000;
-                break;
-            }
-        }
+        loader.style.display = "none";
+        portal.style.display = "block";
+        document.getElementById("notifIcon").style.display = "block";
+        document.getElementById("installBtn").style.display = "none";
+        showView(targetView);
 
-        // 3. Populate Student Info & PHOTO
-        document.getElementById("studentName").innerText = studentName;
-        document.getElementById("welcomeName").innerText = "Welcome, " + studentName;
-        document.getElementById("class").innerText = studentClass;
-        document.getElementById("adm").innerText = admission;
-        document.getElementById("father").innerText = father;
-        document.getElementById("mother").innerText = mother;
-        document.getElementById("phone").innerText = phone;
-        document.getElementById("address").innerText = address;
-
-        // --- PHOTO LOGIC ---
-if (photoUrl && photoUrl.trim() !== "") {
-    let fileId = "";
-    if (photoUrl.includes("id=")) {
-        fileId = photoUrl.split("id=")[1].split("&")[0];
-    } else if (photoUrl.includes("/d/")) {
-        fileId = photoUrl.split("/d/")[1].split("/")[0];
-    }
-
-    if (fileId) {
-        const photoImg = document.getElementById("studentPhoto");
-        // This is the most reliable "Direct Link" for Google Drive images in 2026
-        photoImg.src = `https://lh3.googleusercontent.com/u/0/d/${fileId}`;
-        
-        // Ensure it displays below by making it a block element
-        photoImg.style.display = "inline-block"; 
-        
-        // Fallback: If the link above fails, try the older thumbnail format
-        photoImg.onerror = function() {
-            this.src = `https://drive.google.com/thumbnail?id=${fileId}&sz=w500`;
-        };
-    }
-}
-        // 4. Fees Collection
-        resp = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetID}/values/${feesSheet}?key=${apiKey}`);
-        rows = (await resp.json()).values || [];
-        let table = "", cards = "", totalPaid = 0;
-
-        for (let i = 1; i < rows.length; i++) {
-            let r = rows[i]; 
-            if (r[2] == admission) {
-                let date = r[1] || "", slip = r[0] || "", amount = parseFloat(r[5]) || 0;
-                let feeType = r[6] || "", session = r[7] || "", tMonths = r[8] || "", trMonths = r[9] || "", exMonths = r[10] || "", mode = r[11] || "";
-                if (session == "2026-27" && feeType.toLowerCase() == "monthly fees") totalPaid += amount;
-
-                table += `<tr><td>${date}</td><td>${slip}</td><td>₹${amount}</td><td>${feeType}</td><td>${session}</td><td>${tMonths}</td><td>${trMonths}</td><td>${exMonths}</td><td>${mode}</td></tr>`;
-                cards += `<div class="fee-card"><div><b>Date:</b> ${date}</div><div><b>Slip Number:</b> ${slip}</div><div><b>Amount Paid:</b> ₹${amount}</div><div><b>Fee Type:</b> ${feeType}</div><div><b>Session:</b> ${session}</div><div><b>Tuition Fee Months:</b> ${tMonths}</div><div><b>Transport Fee Months:</b> ${trMonths}</div><div><b>Exam Fee Months:</b> ${exMonths}</div><div><b>Payment Mode:</b> ${mode}</div></div>`;
-            }
-        }
-// 4A. Fetch Notification
-let notificationMessage = "No Notification Yet";
-let showBadge = false;
-
-try {
-    let noticeResp = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetID}/values/${noticeSheet}!J20:K21?key=${apiKey}`);
-    let noticeData = (await noticeResp.json()).values || [];
-
-    if (noticeData.length > 0) {
-        let row = noticeData[0];
-        let message = noticeData[1][0]; // J21
-let status = noticeData[0][1];  // K20
-
-        if (status.toLowerCase() === "publish") {
-            notificationMessage = message || "New Notification";
-            showBadge = true;
-        }
-    }
-} catch (e) {
-    console.log("Notification fetch error", e);
-}
-        // 5. Final Calculation & Display
-        let totalFee = ((monthlyTuition - discount) * tuitionMonths) + (transportFees * transportMonths) + examFee + prevRemain;
-        let feeBalance = totalFee - totalPaid;
-
-        document.getElementById("feeTable").innerHTML = table;
-        document.getElementById("feeCards").innerHTML = cards;
-        document.getElementById("monthlyTuition").innerText = "₹" + monthlyTuition;
-        document.getElementById("tuitionMonths").innerText = tuitionMonths;
-        document.getElementById("transportFees").innerText = "₹" + transportFees;
-        document.getElementById("transportMonths").innerText = transportMonths;
-        document.getElementById("prevRemain").innerText = "₹" + prevRemain;
-        document.getElementById("discount").innerText = "₹" + discount;
-        document.getElementById("totalPaid").innerText = "₹" + totalPaid;
-        document.getElementById("examFee").innerText = "₹" + examFee;
-
-        let bal = document.getElementById("feeBalance");
-        bal.innerText = "₹" + feeBalance;
-        bal.style.color = feeBalance > 0 ? "red" : "green";
-
-        document.getElementById("loginBox").style.display = "none";
-        document.getElementById("loader").style.display = "none";
-        document.getElementById("portal").style.display = "block";
-// Show notification icon
-const icon = document.getElementById("notificationIcon");
-const badge = document.getElementById("notificationBadge");
-const box = document.getElementById("notificationBox");
-const text = document.getElementById("notificationText");
-
-icon.style.display = "block";
-
-// Set badge
-if (showBadge) {
-    badge.style.display = "inline-block";
-    icon.style.animation = "glow 1s infinite";
-} else {
-    badge.style.display = "none";
-}
-
-// Click event
-icon.onclick = () => {
-    box.style.display = (box.style.display === "block") ? "none" : "block";
-    text.innerText = showBadge ? notificationMessage : "No Notification Yet";
-};
-        populateFeeSelectors(examFee);
-        setupFeeBalancePayment();
-        setupSendScreenshotButton();
-
-// ===== DATE SHEET FETCH =====
-try {
-    let dsResp = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetID}/values/${noticeSheet}?key=${apiKey}`);
-    let dsData = (await dsResp.json()).values || [];
-
-    let publishStatus = (dsData[13] && dsData[13][10]) ? dsData[13][10].toLowerCase() : ""; // K14
-    if (publishStatus === "publish") {
-
-        document.getElementById("dateSheetSection").style.display = "block";
-
-        let examTitle = dsData[0][1] || "";   // B1
-        let session = dsData[0][5] || "";     // F1
-
-        let studentClass = document.getElementById("class").innerText.trim();
-
-        // Find class column (Row 2, B to P)
-        let classRow = dsData[1] || [];
-        let classColIndex = -1;
-
-        for (let i = 1; i <= 15; i++) {
-            if (classRow[i] && classRow[i].toString().trim().toLowerCase() === studentClass.toLowerCase()) {
-                classColIndex = i;
-                break;
-            }
-        }
-
-        let html = `<h3 style="text-align:center;">${examTitle}</h3>
-                    <div style="text-align:center; margin-bottom:10px;"><b>Session :</b> ${session}</div>`;
-
-        if (classColIndex !== -1) {
-
-            html += `<table>
-                        <tr><th>Date</th><th>Subject</th></tr>`;
-
-            // ===== CASE 1: PT Exams =====
-            if (examTitle.includes("PT")) {
-
-                for (let i = 6; i <= 11; i++) { // Rows 7–12
-                    let date = dsData[i][0] || "";
-                    let subject = dsData[i][classColIndex] || "";
-
-                    if (date || subject) {
-                        html += `<tr><td>${date}</td><td>${subject}</td></tr>`;
-                    }
-                }
-            }
-
-            // ===== CASE 2: Half Yearly / Annual =====
-            else {
-
-                // Minor Exams
-                html += `<tr><th colspan="2">Minor Exams</th></tr>`;
-                for (let i = 3; i <= 4; i++) { // Rows 4–5
-                    let date = dsData[i][0] || "";
-                    let subject = dsData[i][classColIndex] || "";
-
-                    if (date || subject) {
-                        html += `<tr><td>${date}</td><td>${subject}</td></tr>`;
-                    }
-                }
-
-                // Major Exams
-                html += `<tr><th colspan="2">Major Exams</th></tr>`;
-                for (let i = 6; i <= 11; i++) { // Rows 7–12
-                    let date = dsData[i][0] || "";
-                    let subject = dsData[i][classColIndex] || "";
-
-                    if (date || subject) {
-                        html += `<tr><td>${date}</td><td>${subject}</td></tr>`;
-                    }
-                }
-            }
-
-            html += `</table>`;
-        } else {
-            html += `<div style="text-align:center;">No Date Sheet Available</div>`;
-        }
-
-        document.getElementById("dateSheetContent").innerHTML = html;
-    }
-
-} catch (e) {
-    console.log("Date Sheet error", e);
-}
+        // BACKGROUND FETCH: Fees and Attendance load while user looks at dashboard
+        fetchBackgroundData(student[1], mRow);
 
     } catch (e) {
         console.error(e);
-        alert("An error occurred during login. Check console for details.");
-        document.getElementById("loader").style.display = "none";
-        document.getElementById("loginBtn").disabled = false;
+        loader.style.display = "none";
+        loginBox.style.display = "block";
     }
 }
 
-function logout() { location.reload(); }
+async function fetchBackgroundData(adm, mRow) {
+    const urls = [
+        `https://sheets.googleapis.com/v4/spreadsheets/${sheetID}/values/${sheets.fees}?key=${apiKey}`,
+        `https://sheets.googleapis.com/v4/spreadsheets/${sheetID}/values/${sheets.att}?key=${apiKey}`
+    ];
+    const responses = await Promise.all(urls.map(url => fetch(url)));
+    const data = await Promise.all(responses.map(res => res.json()));
 
-function populateFeeSelectors(examFee = 500) {
-    const tuition = document.getElementById("calcTuitionMonths");
-    const transport = document.getElementById("calcTransportMonths");
-    const exam = document.getElementById("calcExamMonths");
-    for (let i = 0; i <= 12; i++) tuition.innerHTML += `<option value="${i}">${i}</option>`;
-    for (let i = 0; i <= 11; i++) transport.innerHTML += `<option value="${i}">${i}</option>`;
-    for (let i = 0; i <= 2; i++) exam.innerHTML += `<option value="${i}">${i}</option>`;
-    tuition.addEventListener("change", () => calculateFees(examFee));
-    transport.addEventListener("change", () => calculateFees(examFee));
-    exam.addEventListener("change", () => calculateFees(examFee));
+    renderFees(adm, mRow, data[0].values);
+    renderAttendance(adm, data[1].values);
+    setupSendScreenshotButtons();
 }
 
-function calculateFees(examFee = 500) {
-    const t = parseInt(document.getElementById("calcTuitionMonths").value);
-    const tr = parseInt(document.getElementById("calcTransportMonths").value);
-    const ex = parseInt(document.getElementById("calcExamMonths").value);
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault(); deferredPrompt = e;
+    if (document.getElementById("portal").style.display === "none") {
+        document.getElementById("installBtn").style.display = "block";
+    }
+});
 
-    const monthly = parseFloat(document.getElementById("monthlyTuition").innerText.replace("₹", ""));
-    const transport = parseFloat(document.getElementById("transportFees").innerText.replace("₹", ""));
-    const discount = parseFloat(document.getElementById("discount").innerText.replace("₹", ""));
+document.getElementById("installBtn").onclick = async () => {
+    if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+     
+        if (typeof gtag === 'function') {
+            gtag('event', 'pwa_install_click', { 'outcome': outcome });
+        }
+   
+        if (outcome === 'accepted') document.getElementById("installBtn").style.display = "none";
+        deferredPrompt = null;
+    }
+};
 
-    // Take half of the exam fee for Calculate Fees
-    let examFeePerMonth = examFee / 2;
+function renderAttendance(adm, rows) {
+    if (!rows || rows.length < 4) return;
+    const studentRow = rows.slice(3).find(r => r[2] == adm);
+    const months = [
+        { name: "April", col: 33 }, { name: "May", col: 65 }, { name: "June", col: 96 },
+        { name: "July", col: 128 }, { name: "August", col: 160 }, { name: "September", col: 191 },
+        { name: "October", col: 223 }, { name: "November", col: 254 }, { name: "December", col: 286 },
+        { name: "January", col: 318 }, { name: "February", col: 348 }, { name: "March", col: 380 }
+    ];
+    let html = studentRow ? months.map(m => `<tr><td>${m.name}</td><td>${studentRow[m.col] || "0"}</td></tr>`).join('') : "<tr><td>No attendance records found</td></tr>";
+    document.getElementById("attBody").innerHTML = html;
+}
 
-    let total = (t * (monthly - discount)) + (tr * transport) + (ex * examFeePerMonth);
+function showView(viewId, isHardwareBack = false) {
+    const views = ['view-dashboard', 'view-fees', 'view-attendance', 'view-datesheet', 'view-result'];
+    views.forEach(v => {
+        const el = document.getElementById(v);
+        if(el) el.style.display = (v === viewId) ? 'block' : 'none';
+    });
+    localStorage.setItem("currentView", viewId);
+    if (!isHardwareBack && viewId !== 'view-dashboard') history.pushState({view: viewId}, "");
+    window.scrollTo(0,0);
+}
 
-    document.getElementById("calcTotal").innerText = "₹" + total;
+function getCurrentVisibleView() {
+    const views = ['view-dashboard', 'view-fees', 'view-attendance', 'view-datesheet', 'view-result'];
+    return views.find(id => document.getElementById(id).style.display === 'block');
+}
 
-    document.getElementById("payNowBtn").onclick = () => {
-        if (total <= 0) { alert("Please select months before paying"); return; }
-        const upi = "pinnacleglobalschool.62697340@hdfcbank";
-        const adm = document.getElementById("adm").innerText.trim();
-        const name = document.getElementById("studentName").innerText.trim();
-        const cls = document.getElementById("class").innerText.trim();
-        const note = `${adm} ${name} ${cls} FEE`;
-        const link = `upi://pay?pa=${upi}&pn=Pinnacle Global School&am=${total}&cu=INR&tn=${encodeURIComponent(note)}`;
-        window.location.href = link;
+function logout() { localStorage.clear(); location.reload(); }
+
+function renderFees(adm, mData, fRows) {
+    let monthly = parseFloat(mData[4]) || 0, remain = parseFloat(mData[3]) || 0, disc = parseFloat(mData[5]) || 0;
+    originalDiscount = disc;
+    let tableHtml = "", cardsHtml = "", totalPaid = 0;
+
+    fRows.slice(1).forEach(r => {
+        if (r[2] == adm) {
+            let amt = parseFloat(r[5]) || 0;
+            if (r[7] === "2026-27" && r[6]?.toLowerCase() === "monthly fees") totalPaid += amt;
+            tableHtml += `<tr><td>${r[1]||''}</td><td>${r[0]||''}</td><td>₹${amt}</td><td>${r[6]||''}</td><td>${r[7]||''}</td><td>${r[8]||''}</td><td>${r[9]||''}</td><td>${r[10]||''}</td><td>${r[11]||''}</td></tr>`;
+            cardsHtml += `<div class="fee-card"><div><span class="label">Date:</span> ${r[1]||''}</div><div><span class="label">Slip Number:</span> ${r[0]||''}</div><div><span class="label">Amount Paid:</span> ₹${amt}</div><div><span class="label">Fee Type:</span> ${r[6]||''}</div><div><span class="label">Session:</span> ${r[7]||''}</div><div><span class="label">Tuition Fee Months:</span> ${r[8]||''}</div><div><span class="label">Transport Fee Months:</span> ${r[9]||''}</div><div><span class="label">Exam Fee Months:</span> ${r[10]||''}</div><div><span class="label">Payment Mode:</span> ${r[11]||''}</div></div>`;
+        }
+    });
+
+    document.getElementById("feeTable").innerHTML = tableHtml || "<tr><td colspan='9'>No records found</td></tr>";
+    document.getElementById("feeCards").innerHTML = cardsHtml || "No records found";
+    document.getElementById("monthlyTuition").innerText = "₹" + monthly;
+    document.getElementById("tuitionMonths").innerText = mData[6] || 0;
+    document.getElementById("transportFees").innerText = "₹" + (mData[7] || 0);
+    document.getElementById("transportMonths").innerText = mData[8] || 0;
+    document.getElementById("examFee").innerText = "₹" + (mData[9] || 1000);
+    document.getElementById("prevRemain").innerText = "₹" + remain;
+    document.getElementById("discount").innerText = "₹" + Math.round(disc);
+
+    let totalFee = ((monthly - disc) * (parseFloat(mData[6]) || 0)) + ((parseFloat(mData[7]) || 0) * (parseFloat(mData[8]) || 0)) + (parseFloat(mData[9]) || 1000) + remain;
+    let balance = Math.round(totalFee - totalPaid);
+    document.getElementById("totalPaid").innerText = "₹" + totalPaid;
+    const balEl = document.getElementById("feeBalance");
+    balEl.innerText = "₹" + balance;
+    balEl.style.color = balance > 0 ? "red" : "green";
+
+    populateFeeSelectors(parseFloat(mData[9]) || 1000, monthly, parseFloat(mData[7]) || 0);
+    setupPaymentLink(balance, "payBalanceBtn");
+}
+
+function populateFeeSelectors(exFee, monthly, transport) {
+    const t = document.getElementById("calcTuitionMonths"), tr = document.getElementById("calcTransportMonths"), ex = document.getElementById("calcExamMonths"), res = document.getElementById("calcTotal");
+    if(!t || !tr || !ex || !res) return;
+    t.innerHTML = tr.innerHTML = ex.innerHTML = "";
+    for(let i=0; i<=12; i++) t.innerHTML += `<option value="${i}">${i}</option>`;
+    for(let i=0; i<=11; i++) tr.innerHTML += `<option value="${i}">${i}</option>`;
+    for(let i=0; i<=2; i++) ex.innerHTML += `<option value="${i}">${i}</option>`;
+    const updateCalc = () => {
+        let total = (t.value * (monthly - originalDiscount)) + (tr.value * transport) + (ex.value * (exFee/2));
+        res.innerText = "₹" + Math.round(total);
+        setupPaymentLink(total, "payNowBtn");
+    };
+    t.onchange = tr.onchange = ex.onchange = updateCalc;
+}
+
+function handlePermissions(rows) {
+    if (!rows) return;
+    if (rows[13]?.[10] === "Publish") { 
+        const b = document.getElementById("btn-datesheet"); if(b) { b.classList.remove("frozen"); b.onclick = () => showView('view-datesheet'); }
+    }
+    if (rows[15]?.[10] === "Publish") { 
+        const b = document.getElementById("btn-result"); if(b) { b.classList.remove("frozen"); b.onclick = () => showView('view-result'); }
+    }
+    if (rows[19]?.[10] === "Publish") globalNotification = rows[20]?.[9] || "No notification";
+}
+
+function populateStudentProfile(aw, master) {
+    document.getElementById("welcomeName").innerText = "Welcome, " + (aw[3] || "Student");
+    document.getElementById("studentName").innerText = aw[3];
+    document.getElementById("adm").innerText = aw[1];
+    document.getElementById("class").innerText = master[14];
+    document.getElementById("father").innerText = aw[6];
+    document.getElementById("mother").innerText = aw[5];
+    document.getElementById("phone").innerText = aw[22];
+    document.getElementById("address").innerText = aw[7];
+    const photoImg = document.getElementById("studentPhoto");
+    if (aw[28]) {
+        const fileIdMatch = aw[28].match(/[-\w]{25,}/);
+        if (fileIdMatch) { 
+            photoImg.src = `https://drive.google.com/thumbnail?id=${fileIdMatch[0]}&sz=w500`; 
+            photoImg.onload = () => photoImg.style.display = "inline-block"; 
+        }
+    }
+}
+
+function setupDateSheet(rows, studentClass) {
+    if (!rows || rows.length < 2) return;
+    const examType = rows[0]?.[1] || ""; 
+    document.getElementById("ds-title").innerText = "Date Sheet: " + examType;
+    let classCol = -1;
+    for(let j=1; j<=15; j++) { if(rows[1][j] == studentClass) { classCol = j; break; } }
+    let html = "";
+    if(classCol !== -1) {
+        if(examType.includes("Half Yearly") || examType.includes("Annual")) {
+            html += `<tr class="ds-type-header"><td colspan="2">Minor Exams</td></tr>`;
+            [3, 4].forEach(idx => { if(rows[idx]?.[0]) html += `<tr><td>${rows[idx][0]}</td><td>${rows[idx][classCol] || '-'}</td></tr>`; });
+            html += `<tr class="ds-type-header"><td colspan="2">Major Exams</td></tr>`;
+        }
+        [6, 7, 8, 9, 10, 11].forEach(idx => { if(rows[idx]?.[0]) html += `<tr><td>${rows[idx][0]}</td><td>${rows[idx][classCol] || '-'}</td></tr>`; });
+    }
+    document.getElementById("dsBody").innerHTML = html || "<tr><td colspan='2'>Nothing to show</td></tr>";
+}
+
+function setupPaymentLink(amount, btnId) {
+    const btn = document.getElementById(btnId); if(!btn) return;
+    btn.onclick = () => {
+        if (amount <= 0) return alert("Enter amount > 0");
+        const note = encodeURIComponent(`${document.getElementById("adm").innerText} ${document.getElementById("studentName").innerText} FEE`);
+        window.location.href = `upi://pay?pa=pinnacleglobalschool.62697340@hdfcbank&pn=Pinnacle Global School&am=${amount}&cu=INR&tn=${note}`;
     };
 }
 
-function setupFeeBalancePayment() {
-    const btn = document.getElementById("payBalanceBtn");
-    btn.addEventListener("click", () => {
-        let text = document.getElementById("feeBalance").innerText.replace(/[^0-9]/g, "");
-        let amount = parseFloat(text);
-        if (amount <= 0) { alert("No balance to pay"); return; }
-        const upi = "pinnacleglobalschool.62697340@hdfcbank";
-        const adm = document.getElementById("adm").innerText.trim();
-        const name = document.getElementById("studentName").innerText.trim();
-        const cls = document.getElementById("class").innerText.trim();
-        const note = `${adm} ${name} ${cls} FEE`;
-        const link = `upi://pay?pa=${upi}&pn=Pinnacle Global School&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;
-        window.location.href = link;
-    });
+function setupSendScreenshotButtons() {
+    const handler = () => {
+        const msg = encodeURIComponent(`Hello, I have completed the payment.\nAdmission No: ${document.getElementById("adm").innerText}\nName: ${document.getElementById("studentName").innerText}`);
+        window.location.href = `https://wa.me/917830968000?text=${msg}`;
+    };
+    const b1 = document.getElementById("sendScreenshotBalanceBtn"), b2 = document.getElementById("sendScreenshotCalcBtn");
+    if(b1) b1.onclick = handler; if(b2) b2.onclick = handler;
 }
 
-function setupSendScreenshotButton() {
-    const sendBtns = [
-        document.getElementById("sendScreenshotBalanceBtn"),
-        document.getElementById("sendScreenshotCalcBtn")
-    ].filter(Boolean);
+function showNotification() {
+    const overlay = document.createElement('div');
+    overlay.style = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:10000; display:flex; align-items:center; justify-content:center; padding:20px;";
+    overlay.innerHTML = `<div style="background:white; padding:20px; border-radius:10px; max-width:400px; width:100%; text-align:center;"><h3 style="color:#0b3d91;">📢 School Notice</h3><p style="white-space:pre-wrap; text-align:left; font-size:14px;">${globalNotification}</p><button onclick="this.parentElement.parentElement.remove()" style="background:#0b3d91; color:white; border:none; padding:10px 20px; border-radius:5px;">Close</button></div>`;
+    document.body.appendChild(overlay);
+}
 
-    sendBtns.forEach(btn => {
-        btn.addEventListener("click", () => {
-            const adm = document.getElementById("adm").innerText.trim();
-            const name = document.getElementById("studentName").innerText.trim();
-            const cls = document.getElementById("class").innerText.trim();
-            const message = `Hello, I have completed the fee payment.\nAdmission No: ${adm}\nName: ${name}\nClass: ${cls}\nPlease find the attached screenshot of my payment.`;
-            const phone = "917830968000";
-            const link = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
-            window.location.href = link;
+if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
+// Add this at the very end of script.js
+window.addEventListener('DOMContentLoaded', () => {
+    // Check if the app is running in "standalone" mode (installed PWA)
+    const isPWA = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    const displayMode = isPWA ? 'PWA' : 'Browser';
+    
+    if (typeof gtag === 'function') {
+        gtag('event', 'app_launch', {
+            'display_mode': displayMode
         });
-    });
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("loginBtn").addEventListener("click", login);
-    document.getElementById("loginCode").addEventListener("keypress", function (e) {
-        if (e.key === "Enter") login();
-    });
-});
-
-document.addEventListener("click", function(e) {
-    const icon = document.getElementById("notificationIcon");
-    const box = document.getElementById("notificationBox");
-
-    if (!icon.contains(e.target) && !box.contains(e.target)) {
-        box.style.display = "none";
     }
 });
