@@ -6,12 +6,14 @@ const sheets = {
     fees: encodeURIComponent("Fees Collection"),
     aw: encodeURIComponent("AW"),
     ds: encodeURIComponent("DS n Notice"),
-    att: encodeURIComponent("Attendance")
+    att: encodeURIComponent("Attendance"),
+    res: encodeURIComponent("Res") // New sheet added
 };
 
 let originalDiscount = 0;
 let globalNotification = "No notification to show";
 let deferredPrompt;
+let currentUserData = {}; // To store Adm and Class for Result calculation
 
 document.addEventListener("DOMContentLoaded", () => {
     const savedCode = localStorage.getItem("portalLoginCode");
@@ -47,11 +49,11 @@ async function login(isAuto = false, targetView = 'view-dashboard') {
     loader.style.display = "block";
 
     try {
-        // PRIORITY FETCH: Get basic student info and notices first
         const priorityUrls = [
             `https://sheets.googleapis.com/v4/spreadsheets/${sheetID}/values/${sheets.aw}?key=${apiKey}`,
             `https://sheets.googleapis.com/v4/spreadsheets/${sheetID}/values/${sheets.master}?key=${apiKey}`,
-            `https://sheets.googleapis.com/v4/spreadsheets/${sheetID}/values/${sheets.ds}?key=${apiKey}`
+            `https://sheets.googleapis.com/v4/spreadsheets/${sheetID}/values/${sheets.ds}?key=${apiKey}`,
+            `https://sheets.googleapis.com/v4/spreadsheets/${sheetID}/values/${sheets.res}?key=${apiKey}` // Fetch Results
         ];
 
         const pResponses = await Promise.all(priorityUrls.map(url => fetch(url)));
@@ -66,22 +68,26 @@ async function login(isAuto = false, targetView = 'view-dashboard') {
         const mRow = pData[1].values.find(r => r[1] == student[1]);
         if (!mRow) { alert("Data Not Found. Contact School Admin"); logout(); return; }
 
+        // Store student info for result processing
+        currentUserData = {
+            adm: student[1],
+            name: student[3],
+            class: mRow[14]
+        };
+
         localStorage.setItem("portalLoginCode", code);
-        // --- ADD THIS LINE HERE ---
-if (typeof gtag === 'function') gtag('event', 'login', { 'method': isAuto ? 'Auto_Login' : 'Manual_Login' });
-// --------------------------
-        // Render Dashboard Immediately
+        if (typeof gtag === 'function') gtag('event', 'login', { 'method': isAuto ? 'Auto_Login' : 'Manual_Login' });
+
         handlePermissions(pData[2].values);
         populateStudentProfile(student, mRow);
         setupDateSheet(pData[2].values, mRow[14]);
+        renderResult(pData[2].values, pData[3].values); // Process Result page
 
         loader.style.display = "none";
         portal.style.display = "block";
         document.getElementById("notifIcon").style.display = "block";
-        document.getElementById("installBtn").style.display = "none";
         showView(targetView);
 
-        // BACKGROUND FETCH: Fees and Attendance load while user looks at dashboard
         fetchBackgroundData(student[1], mRow);
 
     } catch (e) {
@@ -90,6 +96,103 @@ if (typeof gtag === 'function') gtag('event', 'login', { 'method': isAuto ? 'Aut
         loginBox.style.display = "block";
     }
 }
+
+function handlePermissions(dsRows) {
+    if (!dsRows) return;
+    
+    // DateSheet Permission (K14 / Row 13)
+    if (dsRows[13]?.[10] === "Publish") { 
+        const b = document.getElementById("btn-datesheet"); 
+        if(b) { b.classList.remove("frozen"); b.onclick = () => showView('view-datesheet'); }
+    }
+
+    // Result Button - NO LONGER FROZEN
+    const resBtn = document.getElementById("btn-result");
+    if(resBtn) {
+        resBtn.classList.remove("frozen");
+        resBtn.onclick = () => showView('view-result');
+    }
+
+    // Notification Permission
+    if (dsRows[19]?.[10] === "Publish") globalNotification = dsRows[20]?.[9] || "No notification";
+}
+
+function renderResult(dsRows, resRows) {
+    const resultView = document.getElementById("view-result");
+    const isPublished = dsRows[15]?.[10] === "Publish"; // Cell K16
+    const examName = dsRows[16]?.[10] || "Examination"; // Cell K17
+
+    if (!isPublished) {
+        resultView.innerHTML = `
+            <div class="profile" style="text-align:center;"><h3>No result to show</h3></div>
+            <button class="back-btn" onclick="showView('view-dashboard')">← Back to Dashboard</button>`;
+        return;
+    }
+
+    // Identify Columns based on Exam Name
+    let marksCol = 5; // Col F
+    let gradeCol = 6; // Col G
+    if (examName === "Annual Exam") {
+        marksCol = 11; // Col L
+        gradeCol = 12; // Col M
+    }
+
+    // Find Student Row in Res Sheet (Column B)
+    const studentIdx = resRows.findIndex(r => r[1] == currentUserData.adm);
+    
+    if (studentIdx === -1) {
+        resultView.innerHTML = `<div class="profile"><h3>Data not found in Result Sheet</h3></div>`;
+        return;
+    }
+
+    // Determine subject count based on class
+    let subjectCount = 0;
+    const cls = currentUserData.class;
+    if (["Nursery", "LKG", "UKG"].includes(cls)) subjectCount = 3;
+    else if (["1st", "2nd", "3rd", "4th", "5th"].includes(cls)) subjectCount = 5;
+    else subjectCount = 6;
+
+    // Build Table
+    let tableRows = "";
+    let totalMarks = 0;
+    const startRow = studentIdx + 5; // Logic: 5 cells below admission number
+
+    for (let i = 0; i < subjectCount; i++) {
+        const row = resRows[startRow + i];
+        if (row) {
+            const subject = row[0] || "-";
+            const marks = parseFloat(row[marksCol]) || 0;
+            const grade = row[gradeCol] || "-";
+            totalMarks += marks;
+            tableRows += `<tr><td>${subject}</td><td>${marks}</td><td>${grade}</td></tr>`;
+        }
+    }
+
+    const percentage = (totalMarks / subjectCount).toFixed(2);
+
+    resultView.innerHTML = `
+        <div class="section-title">${examName}</div>
+        <div class="profile">
+            <h3 style="text-align:center; color:#0b3d91; margin-top:0;">Result</h3>
+            <p><span class="label">Student Name :</span> ${currentUserData.name}</p>
+            <div class="table-container">
+                <table style="width:100%">
+                    <thead>
+                        <tr><th>Subject</th><th>Marks (out of 100)</th><th>Grade</th></tr>
+                    </thead>
+                    <tbody>${tableRows}</tbody>
+                </table>
+            </div>
+            <div style="margin-top:15px; padding:10px; border-top:2px solid #eee;">
+                <p><span class="label">Total Marks :</span> ${totalMarks}</p>
+                <p><span class="label">Percentage :</span> ${percentage}%</p>
+            </div>
+        </div>
+        <button class="back-btn" onclick="showView('view-dashboard')">← Back to Dashboard</button>
+    `;
+}
+
+// ... rest of your functions (fetchBackgroundData, renderAttendance, etc.) stay the same ...
 
 async function fetchBackgroundData(adm, mRow) {
     const urls = [
