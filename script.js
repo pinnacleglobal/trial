@@ -344,8 +344,7 @@ function setupDateSheet(rows, studentClass) {
     const isPublished = rows && rows[13] && rows[13][10] === "Publish";
 
     if (!isPublished) {
-        dsTitle.innerText = "Date Sheet";
-        dsBody.innerHTML = `<tr><td colspan="2" style="padding:50px; color:#666; font-style:italic; font-weight:normal;">No Datesheet to show</td></tr>`;
+      >No Datesheet to show</td></tr>`;
         return;
     }
 
