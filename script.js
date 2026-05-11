@@ -91,52 +91,41 @@ async function login(isAuto = false, targetView = 'view-dashboard') {
 function handlePermissions(dsRows) {
     if (!dsRows) return;
     
-    // 1. DateSheet - Remains conditional
-    const dsBtn = document.getElementById("btn-datesheet");
+    // Date-Sheet still uses the frozen logic
     if (dsRows[13]?.[10] === "Publish") { 
-        if(dsBtn) { 
-            dsBtn.classList.remove("frozen"); 
-            dsBtn.onclick = () => showView('view-datesheet'); 
+        const b = document.getElementById("btn-datesheet"); 
+        if(b) { 
+            b.classList.remove("frozen"); 
+            b.onclick = () => showView('view-datesheet'); 
         }
     }
-
-    // 2. Result Button - ALWAYS ACTIVE
-    // We remove the class and manually reset styles to override the CSS
-    const resBtn = document.getElementById("btn-result");
-    if(resBtn) {
-        resBtn.classList.remove("frozen"); 
-        resBtn.style.opacity = "1";
-        resBtn.style.cursor = "pointer";
-        resBtn.style.pointerEvents = "auto"; // CRITICAL: This allows clicking
-        resBtn.onclick = () => showView('view-result');
-    }
-
-    // 3. Notification
+    
+    // Notification logic
     if (dsRows[19]?.[10] === "Publish") globalNotification = dsRows[20]?.[9] || "No notification";
 }
 
 function renderResult(dsRows, resRows) {
     const resultView = document.getElementById("view-result");
     
-    // K16 is Row 16, Col K (Index 15, 10)
-    const isPublished = dsRows[15]?.[10] === "Publish"; 
-    // K17 is Row 17, Col K (Index 16, 10)
+    // Check K16 for Publish status (Row index 15, Column index 10)
+    const isPublished = dsRows[15]?.[10] === "Publish";
+    // Check K17 for Heading (Row index 16, Column index 10)
     const examHeading = dsRows[16]?.[10] || "Examination Result";
 
-    // IF UN-PUBLISHED: Show the empty state
+    // IF UN-PUBLISHED
     if (!isPublished) {
         resultView.innerHTML = `
             <div class="section-title">Result</div>
-            <div class="profile" style="text-align:center; padding: 40px 20px;">
-                <h3 style="color: #555;">No result to show</h3>
+            <div class="profile" style="text-align:center; padding: 50px 20px;">
+                <h3 style="color: #666;">No result to show</h3>
             </div>
             <button class="back-btn" onclick="showView('view-dashboard')">← Back to Dashboard</button>`;
         return;
     }
 
-    // IF PUBLISHED: Determine columns
-    let marksCol = 5; // Col F (Half Yr)
-    let gradeCol = 6; // Col G (Half Yr)
+    // IF PUBLISHED - Logic to fetch data
+    let marksCol = 5; // Col F
+    let gradeCol = 6; // Col G
     if (examHeading === "Annual Exam") {
         marksCol = 11; // Col L
         gradeCol = 12; // Col M
@@ -145,7 +134,7 @@ function renderResult(dsRows, resRows) {
     // Find student in Res sheet (Column B)
     const studentIdx = resRows.findIndex(r => r[1] == currentUserData.adm);
     if (studentIdx === -1) {
-        resultView.innerHTML = `<div class="profile"><h3>Data not found.</h3></div>`;
+        resultView.innerHTML = `<div class="profile"><h3>Data not found.</h3></div><button class="back-btn" onclick="showView('view-dashboard')">← Back to Dashboard</button>`;
         return;
     }
 
@@ -157,7 +146,7 @@ function renderResult(dsRows, resRows) {
 
     let tableRows = "";
     let totalMarks = 0;
-    const startRow = studentIdx + 5; // Start 5 rows below Admission Number
+    const startRow = studentIdx + 5; // 5 cells below admission number cell
 
     for (let i = 0; i < subCount; i++) {
         const row = resRows[startRow + i];
@@ -172,7 +161,6 @@ function renderResult(dsRows, resRows) {
 
     const percentage = (totalMarks / subCount).toFixed(2);
 
-    // Render Full Page
     resultView.innerHTML = `
         <div class="section-title">${examHeading}</div>
         <div class="profile">
@@ -191,8 +179,7 @@ function renderResult(dsRows, resRows) {
                 <div class="info"><span class="label">Percentage :</span> ${percentage}%</div>
             </div>
         </div>
-        <button class="back-btn" onclick="showView('view-dashboard')">← Back to Dashboard</button>
-    `;
+        <button class="back-btn" onclick="showView('view-dashboard')">← Back to Dashboard</button>`;
 }
 // Ensure the existing functions like showView, logout, populateStudentProfile, etc., are present below
 
