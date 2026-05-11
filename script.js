@@ -91,92 +91,98 @@ async function login(isAuto = false, targetView = 'view-dashboard') {
 function handlePermissions(dsRows) {
     if (!dsRows) return;
     
-    // DateSheet - Keep original logic
+    // 1. DateSheet - Keep original logic
+    const dsBtn = document.getElementById("btn-datesheet");
     if (dsRows[13]?.[10] === "Publish") { 
-        const b = document.getElementById("btn-datesheet"); 
-        if(b) { b.classList.remove("frozen"); b.onclick = () => showView('view-datesheet'); }
+        if(dsBtn) { 
+            dsBtn.classList.remove("frozen"); 
+            dsBtn.onclick = () => showView('view-datesheet'); 
+        }
     }
 
-    // Result Button - ALWAYS UNFROZEN NOW
+    // 2. Result Button - FORCE UNFREEZE
     const resBtn = document.getElementById("btn-result");
     if(resBtn) {
-        resBtn.classList.remove("frozen");
+        resBtn.classList.remove("frozen"); // Remove the grayed-out look
         resBtn.style.opacity = "1";
         resBtn.style.cursor = "pointer";
+        resBtn.style.pointerEvents = "auto"; // Ensure it captures clicks
         resBtn.onclick = () => showView('view-result');
     }
 
+    // 3. Notification
     if (dsRows[19]?.[10] === "Publish") globalNotification = dsRows[20]?.[9] || "No notification";
 }
 
 function renderResult(dsRows, resRows) {
     const resultView = document.getElementById("view-result");
-    // Check Cell K16 (Index 15, Column 10)
+    
+    // Check Cell K16 for Publish/Un-Publish status
     const isPublished = dsRows[15]?.[10] === "Publish"; 
-    // Check Cell K17 (Index 16, Column 10)
-    const examTypeHeader = dsRows[16]?.[10] || "Examination Result";
+    
+    // Check Cell K17 for the Heading (Half Yearly / Annual)
+    const examHeading = dsRows[16]?.[10] || "Examination";
 
-    // 1. If NOT Published, show "No result to show"
+    // Scenario: Un-Published
     if (!isPublished) {
         resultView.innerHTML = `
             <div class="section-title">Result</div>
-            <div class="profile" style="text-align:center; padding: 40px 20px;">
-                <i class="fas fa-info-circle" style="font-size: 40px; color: #ccc; margin-bottom: 15px;"></i>
+            <div class="profile" style="text-align:center; padding: 50px 20px;">
                 <h3 style="color: #666;">No result to show</h3>
             </div>
             <button class="back-btn" onclick="showView('view-dashboard')">← Back to Dashboard</button>`;
         return;
     }
 
-    // 2. Determine Columns (Half Yr vs Annual)
-    let marksCol = 5; // Col F
-    let gradeCol = 6; // Col G
-    if (examTypeHeader === "Annual Exam") {
+    // Scenario: Published - Process Data
+    let marksCol = 5; // Default Col F (Half Yearly)
+    let gradeCol = 6; // Default Col G (Half Yearly)
+    
+    if (examHeading === "Annual Exam") {
         marksCol = 11; // Col L
         gradeCol = 12; // Col M
     }
 
-    // 3. Find Student Row in Res Sheet (Column B)
+    // Find Student by Adm No in Res Sheet Column B
     const studentIdx = resRows.findIndex(r => r[1] == currentUserData.adm);
     
     if (studentIdx === -1) {
-        resultView.innerHTML = `<div class="profile" style="text-align:center;"><h3>Result data not found.</h3></div><button class="back-btn" onclick="showView('view-dashboard')">← Back to Dashboard</button>`;
+        resultView.innerHTML = `
+            <div class="profile"><h3>Record not found for Adm No: ${currentUserData.adm}</h3></div>
+            <button class="back-btn" onclick="showView('view-dashboard')">← Back to Dashboard</button>`;
         return;
     }
 
-    // 4. Determine subject count based on class
-    let subjectCount = 0;
+    // Determine Subject Count
+    let subCount = 6;
     const cls = currentUserData.class;
-    if (["Nursery", "LKG", "UKG"].includes(cls)) subjectCount = 3;
-    else if (["1st", "2nd", "3rd", "4th", "5th"].includes(cls)) subjectCount = 5;
-    else subjectCount = 6;
+    if (["Nursery", "LKG", "UKG"].includes(cls)) subCount = 3;
+    else if (["1st", "2nd", "3rd", "4th", "5th"].includes(cls)) subCount = 5;
 
-    // 5. Build Table Rows
     let tableRows = "";
     let totalMarks = 0;
-    const startRow = studentIdx + 5; // Rows start 5 cells below Admission Number cell
+    const startRow = studentIdx + 5; // 5 cells below the Adm No cell
 
-    for (let i = 0; i < subjectCount; i++) {
+    for (let i = 0; i < subCount; i++) {
         const row = resRows[startRow + i];
         if (row) {
             const subject = row[0] || "-";
-            const marksValue = parseFloat(row[marksCol]) || 0;
-            const gradeValue = row[gradeCol] || "-";
-            totalMarks += marksValue;
-            tableRows += `<tr><td>${subject}</td><td>${marksValue}</td><td>${gradeValue}</td></tr>`;
+            const marks = parseFloat(row[marksCol]) || 0;
+            const grade = row[gradeCol] || "-";
+            totalMarks += marks;
+            tableRows += `<tr><td>${subject}</td><td>${marks}</td><td>${grade}</td></tr>`;
         }
     }
 
-    const percentage = (totalMarks / subjectCount).toFixed(2);
+    const percentage = (totalMarks / subCount).toFixed(2);
 
-    // 6. Final UI Rendering
     resultView.innerHTML = `
-        <div class="section-title">${examTypeHeader}</div>
+        <div class="section-title">${examHeading}</div>
         <div class="profile">
-            <h3 style="text-align:center; color:#0b3d91; margin-top:0; border-bottom: 2px solid #d4af37; padding-bottom: 10px;">Result</h3>
+            <h2 style="text-align:center; color:#0b3d91;">Result</h2>
             <div class="info"><span class="label">Student Name :</span> ${currentUserData.name}</div>
             
-            <div class="table-container" style="margin-top: 15px;">
+            <div class="table-container">
                 <table>
                     <thead>
                         <tr>
@@ -189,7 +195,7 @@ function renderResult(dsRows, resRows) {
                 </table>
             </div>
 
-            <div style="margin-top:20px; padding:15px; background: #f9f9f9; border-radius: 8px;">
+            <div style="margin-top:20px; border-top: 2px solid #eee; padding-top:10px;">
                 <div class="info"><span class="label">Total Marks :</span> ${totalMarks}</div>
                 <div class="info"><span class="label">Percentage :</span> ${percentage}%</div>
             </div>
@@ -197,7 +203,6 @@ function renderResult(dsRows, resRows) {
         <button class="back-btn" onclick="showView('view-dashboard')">← Back to Dashboard</button>
     `;
 }
-
 // Ensure the existing functions like showView, logout, populateStudentProfile, etc., are present below
 
 // ... rest of your functions (fetchBackgroundData, renderAttendance, etc.) stay the same ...
