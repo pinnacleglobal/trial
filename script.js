@@ -344,7 +344,7 @@ function setupDateSheet(rows, studentClass) {
     const isPublished = rows && rows[13] && rows[13][10] === "Publish";
 
     if (!isPublished) {
-      >No Datesheet to show</td></tr>`;
+      >No Datesheet to show<;
         return;
     }
 
