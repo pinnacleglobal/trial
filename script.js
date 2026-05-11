@@ -91,16 +91,23 @@ async function login(isAuto = false, targetView = 'view-dashboard') {
 function handlePermissions(dsRows) {
     if (!dsRows) return;
     
-    // ALWAYS unfreeze the Date-Sheet button
-    const b = document.getElementById("btn-datesheet"); 
-    if (b) { 
-        b.classList.remove("frozen"); 
-        b.style.opacity = "1"; // Force full opacity
-        b.style.cursor = "pointer"; // Force pointer cursor
-        b.onclick = () => showView('view-datesheet'); 
+    // 1. Unfreeze Date-Sheet button unconditionally
+    const bDateSheet = document.getElementById("btn-datesheet"); 
+    if(bDateSheet) { 
+        bDateSheet.classList.remove("frozen"); 
+        bDateSheet.style.opacity = "1";
+        bDateSheet.style.cursor = "pointer";
+        bDateSheet.onclick = () => showView('view-datesheet'); 
+    }
+
+    // 2. Result button logic (K16 - index 15)
+    const bResult = document.getElementById("btn-result");
+    if(bResult && dsRows[15]?.[10] === "Publish") {
+        bResult.classList.remove("frozen");
+        bResult.onclick = () => showView('view-result');
     }
     
-    // Notification logic (stays conditional)
+    // 3. Notification logic (K20 - index 19)
     if (dsRows[19]?.[10] === "Publish") {
         globalNotification = dsRows[20]?.[9] || "No notification";
     }
@@ -341,45 +348,33 @@ function populateStudentProfile(aw, master) {
 function setupDateSheet(rows, studentClass) {
     const dsBody = document.getElementById("dsBody");
     const dsTitle = document.getElementById("ds-title");
-    
-    // Check K14 (Row 13, Col 10)
-    const status = rows[13]?.[10]; 
-    const isPublished = (status === "Publish");
+    if(!dsBody) return;
+
+    // K14 is index [13][10]
+    const isPublished = rows && rows[13] && rows[13][10] === "Publish";
 
     if (!isPublished) {
         dsTitle.innerText = "Date Sheet";
-        dsBody.innerHTML = `
-            <tr>
-                <td colspan="2" style="padding: 50px 10px; color: #888; font-style: italic;">
-                    No Datesheet to show
-                </td>
-            </tr>`;
+        dsBody.innerHTML = `<tr><td colspan="2" style="padding:50px; color:#666; font-style:italic;">No Datesheet to show</td></tr>`;
         return;
     }
 
-    // If Published, proceed with normal rendering
+    // Normal rendering if Published
     const examType = rows[0]?.[1] || ""; 
     dsTitle.innerText = "Date Sheet: " + examType;
-    
     let classCol = -1;
-    for(let j=1; j<=15; j++) { 
-        if(rows[1] && rows[1][j] == studentClass) { classCol = j; break; } 
-    }
+    for(let j=1; j<=15; j++) { if(rows[1] && rows[1][j] == studentClass) { classCol = j; break; } }
     
     let html = "";
     if(classCol !== -1) {
         if(examType.includes("Half Yearly") || examType.includes("Annual")) {
             html += `<tr class="ds-type-header"><td colspan="2">Minor Exams</td></tr>`;
-            [3, 4].forEach(idx => { 
-                if(rows[idx]?.[0]) html += `<tr><td>${rows[idx][0]}</td><td>${rows[idx][classCol] || '-'}</td></tr>`; 
-            });
+            [3, 4].forEach(idx => { if(rows[idx]?.[0]) html += `<tr><td>${rows[idx][0]}</td><td>${rows[idx][classCol] || '-'}</td></tr>`; });
             html += `<tr class="ds-type-header"><td colspan="2">Major Exams</td></tr>`;
         }
-        [6, 7, 8, 9, 10, 11].forEach(idx => { 
-            if(rows[idx]?.[0]) html += `<tr><td>${rows[idx][0]}</td><td>${rows[idx][classCol] || '-'}</td></tr>`; 
-        });
+        [6, 7, 8, 9, 10, 11].forEach(idx => { if(rows[idx]?.[0]) html += `<tr><td>${rows[idx][0]}</td><td>${rows[idx][classCol] || '-'}</td></tr>`; });
     }
-    document.getElementById("dsBody").innerHTML = html || "<tr><td colspan='2'>Nothing to show</td></tr>";
+    dsBody.innerHTML = html || "<tr><td colspan='2'>Nothing to show</td></tr>";
 }
 
 function setupPaymentLink(amount, btnId) {
