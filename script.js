@@ -88,30 +88,6 @@ async function login(isAuto = false, targetView = 'view-dashboard') {
     }
 }
 
-function handlePermissions(dsRows) {
-    if (!dsRows) return;
-    
-    // 1. Unfreeze Date-Sheet button unconditionally
-    const bDateSheet = document.getElementById("btn-datesheet"); 
-    if(bDateSheet) { 
-        bDateSheet.classList.remove("frozen"); 
-        bDateSheet.style.opacity = "1";
-        bDateSheet.style.cursor = "pointer";
-        bDateSheet.onclick = () => showView('view-datesheet'); 
-    }
-
-    // 2. Result button logic (K16 - index 15)
-    const bResult = document.getElementById("btn-result");
-    if(bResult && dsRows[15]?.[10] === "Publish") {
-        bResult.classList.remove("frozen");
-        bResult.onclick = () => showView('view-result');
-    }
-    
-    // 3. Notification logic (K20 - index 19)
-    if (dsRows[19]?.[10] === "Publish") {
-        globalNotification = dsRows[20]?.[9] || "No notification";
-    }
-}
 function renderResult(dsRows, resRows) {
     const resultView = document.getElementById("view-result");
     
@@ -315,17 +291,31 @@ function populateFeeSelectors(exFee, monthly, transport) {
     t.onchange = tr.onchange = ex.onchange = updateCalc;
 }
 
-function handlePermissions(rows) {
-    if (!rows) return;
-    if (rows[13]?.[10] === "Publish") { 
-        const b = document.getElementById("btn-datesheet"); if(b) { b.classList.remove("frozen"); b.onclick = () => showView('view-datesheet'); }
+function handlePermissions(dsRows) {
+    if (!dsRows) return;
+    
+    // 1. Unfreeze Date-Sheet button EVERY TIME
+    const bDateSheet = document.getElementById("btn-datesheet"); 
+    if(bDateSheet) { 
+        bDateSheet.classList.remove("frozen"); 
+        bDateSheet.style.opacity = "1";
+        bDateSheet.style.cursor = "pointer";
+        // Force the click action to work
+        bDateSheet.onclick = () => showView('view-datesheet'); 
     }
-    if (rows[15]?.[10] === "Publish") { 
-        const b = document.getElementById("btn-result"); if(b) { b.classList.remove("frozen"); b.onclick = () => showView('view-result'); }
-    }
-    if (rows[19]?.[10] === "Publish") globalNotification = rows[20]?.[9] || "No notification";
-}
 
+    // 2. Result button logic (K16 - index 15)
+    const bResult = document.getElementById("btn-result");
+    if(bResult && dsRows[15]?.[10] === "Publish") {
+        bResult.classList.remove("frozen");
+        bResult.onclick = () => showView('view-result');
+    }
+    
+    // 3. Notification logic (K20 - index 19)
+    if (dsRows[19]?.[10] === "Publish") {
+        globalNotification = dsRows[20]?.[9] || "No notification";
+    }
+}
 function populateStudentProfile(aw, master) {
     document.getElementById("welcomeName").innerText = "Welcome, " + (aw[3] || "Student");
     document.getElementById("studentName").innerText = aw[3];
