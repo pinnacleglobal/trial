@@ -341,16 +341,16 @@ function setupDateSheet(rows, studentClass) {
     const isPublished = rows && rows[13] && rows[13][10] === "Publish";
 
     if (!isPublished) {
-        // This replaces EVERYTHING inside the date-sheet div with just the text and a back button
+        // This CSS centers the content vertically and horizontally in the viewport
         datesheetView.innerHTML = `
-            <div style="text-align:center; padding: 100px 20px;">
-                <h3 style="color: #666; font-weight: normal;">No Datesheet to show</h3>
-                <button class="back-btn" onclick="showView('view-dashboard')">← Back to Dashboard</button>
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 80vh; text-align: center;">
+                <h3 style="color: #666; font-weight: normal; margin-bottom: 20px;">No Datesheet to show</h3>
+                <button class="back-btn" onclick="showView('view-dashboard')" style="width: auto; padding: 10px 30px;">← Back to Dashboard</button>
             </div>`;
         return;
     }
 
-    // --- IF PUBLISHED: RESTORE THE ORIGINAL TABLE STRUCTURE ---
+    // --- IF PUBLISHED: REBUILD ORIGINAL STRUCTURE ---
     const examType = rows[0]?.[1] || ""; 
     datesheetView.innerHTML = `
         <div class="section-title" id="ds-title">Date Sheet: ${examType}</div>
