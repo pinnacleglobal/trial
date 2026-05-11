@@ -340,16 +340,16 @@ function setupDateSheet(rows, studentClass) {
     const dsTitle = document.getElementById("ds-title");
     if(!dsBody) return;
 
-    // K14 is index [13][10]
+    // Check K14 status (Row index 13, Column index 10)
     const isPublished = rows && rows[13] && rows[13][10] === "Publish";
 
     if (!isPublished) {
         dsTitle.innerText = "Date Sheet";
-        dsBody.innerHTML = `<tr><td colspan="2" style="padding:50px; color:#666; font-style:italic;">No Datesheet to show</td></tr>`;
+        dsBody.innerHTML = `<tr><td colspan="2" style="padding:50px; color:#666; font-style:italic; font-weight:normal;">No Datesheet to show</td></tr>`;
         return;
     }
 
-    // Normal rendering if Published
+    // --- IF PUBLISHED: RUN NORMAL RENDERING ---
     const examType = rows[0]?.[1] || ""; 
     dsTitle.innerText = "Date Sheet: " + examType;
     let classCol = -1;
@@ -366,7 +366,6 @@ function setupDateSheet(rows, studentClass) {
     }
     dsBody.innerHTML = html || "<tr><td colspan='2'>Nothing to show</td></tr>";
 }
-
 function setupPaymentLink(amount, btnId) {
     const btn = document.getElementById(btnId); if(!btn) return;
     btn.onclick = () => {
