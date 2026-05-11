@@ -91,18 +91,19 @@ async function login(isAuto = false, targetView = 'view-dashboard') {
 function handlePermissions(dsRows) {
     if (!dsRows) return;
     
-    // Always unfreeze and enable the Date-Sheet button
+    // Always enable the Date-Sheet button regardless of cell K14
     const b = document.getElementById("btn-datesheet"); 
     if(b) { 
         b.classList.remove("frozen"); 
         b.onclick = () => showView('view-datesheet'); 
     }
     
-    // Notification logic remains same
+    // Notification logic (K20/J21)
     if (dsRows[19]?.[10] === "Publish") {
         globalNotification = dsRows[20]?.[9] || "No notification";
     }
 }
+
 function renderResult(dsRows, resRows) {
     const resultView = document.getElementById("view-result");
     
@@ -340,31 +341,35 @@ function setupDateSheet(rows, studentClass) {
     const dsBody = document.getElementById("dsBody");
     const dsTitle = document.getElementById("ds-title");
     
-    if (!rows || rows.length < 14) {
-        dsBody.innerHTML = "<tr><td colspan='2'>No Datesheet to show</td></tr>";
-        return;
-    }
+    if (!dsBody) return;
 
-    // Check K14 (Index [13][10]) for Publish status
-    const isPublished = rows[13]?.[10] === "Publish";
+    // Check K14 (Row index 13, Column index 10) for Publish status
+    const isPublished = rows && rows[13] && rows[13][10] === "Publish";
 
     if (!isPublished) {
         dsTitle.innerText = "Date Sheet";
-        dsBody.innerHTML = "<tr><td colspan='2' style='padding:40px; color:#666;'>No Datesheet to show</td></tr>";
+        dsBody.innerHTML = `
+            <tr>
+                <td colspan="2" style="padding: 40px 10px; color: #666; font-style: italic;">
+                    No Datesheet to show
+                </td>
+            </tr>`;
         return;
     }
 
-    // IF PUBLISHED - Run existing logic
-    const examType = rows[0]?.[1] || ""; 
+    // --- IF PUBLISHED: RUN NORMAL RENDERING ---
+    const examType = rows[0]?.[1] || "Examination"; 
     dsTitle.innerText = "Date Sheet: " + examType;
     
     let classCol = -1;
+    // Find the column for the student's class
     for(let j=1; j<=15; j++) { 
-        if(rows[1][j] == studentClass) { classCol = j; break; } 
+        if(rows[1] && rows[1][j] == studentClass) { classCol = j; break; } 
     }
     
     let html = "";
     if(classCol !== -1) {
+        // Handle Minor/Major headers for specific exam types
         if(examType.includes("Half Yearly") || examType.includes("Annual")) {
             html += `<tr class="ds-type-header"><td colspan="2">Minor Exams</td></tr>`;
             [3, 4].forEach(idx => { 
@@ -372,6 +377,8 @@ function setupDateSheet(rows, studentClass) {
             });
             html += `<tr class="ds-type-header"><td colspan="2">Major Exams</td></tr>`;
         }
+        
+        // Render standard exam rows
         [6, 7, 8, 9, 10, 11].forEach(idx => { 
             if(rows[idx]?.[0]) html += `<tr><td>${rows[idx][0]}</td><td>${rows[idx][classCol] || '-'}</td></tr>`; 
         });
