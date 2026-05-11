@@ -234,12 +234,19 @@ function renderAttendance(adm, rows) {
 
 function showView(viewId, isHardwareBack = false) {
     const views = ['view-dashboard', 'view-fees', 'view-attendance', 'view-datesheet', 'view-result'];
+    
     views.forEach(v => {
         const el = document.getElementById(v);
         if(el) el.style.display = (v === viewId) ? 'block' : 'none';
     });
+
     localStorage.setItem("currentView", viewId);
-    if (!isHardwareBack && viewId !== 'view-dashboard') history.pushState({view: viewId}, "");
+
+    // If we are NOT pressing the back button, tell the browser to remember this page
+    if (!isHardwareBack && viewId !== 'view-dashboard') {
+        history.pushState({view: viewId}, "");
+    }
+    
     window.scrollTo(0,0);
 }
 
@@ -386,3 +393,14 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+// This listens for the mobile hardware back button
+window.onpopstate = function(event) {
+    if (document.getElementById("portal").style.display === "block") {
+        const current = getCurrentVisibleView();
+        // If the user is in a sub-page, take them back to the dashboard
+        if (current !== 'view-dashboard') {
+            showView('view-dashboard', true);
+        }
+    }
+};
