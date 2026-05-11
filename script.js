@@ -340,18 +340,21 @@ function setupDateSheet(rows, studentClass) {
     // Check K14 status (Row index 13, Column index 10)
     const isPublished = rows && rows[13] && rows[13][10] === "Publish";
 
+    // IF UN-PUBLISHED - Matches the Result Page logic exactly
     if (!isPublished) {
-        // This CSS centers the content vertically and horizontally in the viewport
         datesheetView.innerHTML = `
-            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 80vh; text-align: center;">
-                <h3 style="color: #666; font-weight: normal; margin-bottom: 20px;">No Datesheet to show</h3>
-                <button class="back-btn" onclick="showView('view-dashboard')" style="width: auto; padding: 10px 30px;">← Back to Dashboard</button>
-            </div>`;
+            <div class="section-title">Date Sheet</div>
+            <div class="profile" style="text-align:center; padding: 50px 20px;">
+                <h3 style="color: #666;">No Datesheet to show</h3>
+            </div>
+            <button class="back-btn" onclick="showView('view-dashboard')">← Back to Dashboard</button>`;
         return;
     }
 
-    // --- IF PUBLISHED: REBUILD ORIGINAL STRUCTURE ---
-    const examType = rows[0]?.[1] || ""; 
+    // IF PUBLISHED - Logic to fetch and display the table
+    const examType = rows[0]?.[1] || "Examination"; 
+    
+    // Re-insert the original structure for the published view
     datesheetView.innerHTML = `
         <div class="section-title" id="ds-title">Date Sheet: ${examType}</div>
         <div class="table-container">
@@ -380,7 +383,9 @@ function setupDateSheet(rows, studentClass) {
             if(rows[idx]?.[0]) html += `<tr><td>${rows[idx][0]}</td><td>${rows[idx][classCol] || '-'}</td></tr>`; 
         });
     }
-    document.getElementById("dsBody").innerHTML = html || "<tr><td colspan='2'>Nothing to show</td></tr>";
+    
+    const bodyEl = document.getElementById("dsBody");
+    if(bodyEl) bodyEl.innerHTML = html || "<tr><td colspan='2'>Nothing to show</td></tr>";
 }
 function setupPaymentLink(amount, btnId) {
     const btn = document.getElementById(btnId); if(!btn) return;
