@@ -334,36 +334,53 @@ function populateStudentProfile(aw, master) {
         }
     }
 }
-
 function setupDateSheet(rows, studentClass) {
-    const dsBody = document.getElementById("dsBody");
-    const dsTitle = document.getElementById("ds-title");
-    if(!dsBody) return;
-
+    const datesheetView = document.getElementById("view-datesheet");
+    
     // Check K14 status (Row index 13, Column index 10)
     const isPublished = rows && rows[13] && rows[13][10] === "Publish";
 
     if (!isPublished) {
-      >No Datesheet to show<;
+        // This replaces EVERYTHING inside the date-sheet div with just the text and a back button
+        datesheetView.innerHTML = `
+            <div style="text-align:center; padding: 100px 20px;">
+                <h3 style="color: #666; font-weight: normal;">No Datesheet to show</h3>
+                <button class="back-btn" onclick="showView('view-dashboard')">← Back to Dashboard</button>
+            </div>`;
         return;
     }
 
-    // --- IF PUBLISHED: RUN NORMAL RENDERING ---
+    // --- IF PUBLISHED: RESTORE THE ORIGINAL TABLE STRUCTURE ---
     const examType = rows[0]?.[1] || ""; 
-    dsTitle.innerText = "Date Sheet: " + examType;
+    datesheetView.innerHTML = `
+        <div class="section-title" id="ds-title">Date Sheet: ${examType}</div>
+        <div class="table-container">
+            <table>
+                <thead><tr><th>Date</th><th>Subject</th></tr></thead>
+                <tbody id="dsBody"></tbody>
+            </table>
+        </div>
+        <button class="back-btn" onclick="showView('view-dashboard')">← Back to Dashboard</button>`;
+
     let classCol = -1;
-    for(let j=1; j<=15; j++) { if(rows[1] && rows[1][j] == studentClass) { classCol = j; break; } }
+    for(let j=1; j<=15; j++) { 
+        if(rows[1] && rows[1][j] == studentClass) { classCol = j; break; } 
+    }
     
     let html = "";
     if(classCol !== -1) {
         if(examType.includes("Half Yearly") || examType.includes("Annual")) {
             html += `<tr class="ds-type-header"><td colspan="2">Minor Exams</td></tr>`;
-            [3, 4].forEach(idx => { if(rows[idx]?.[0]) html += `<tr><td>${rows[idx][0]}</td><td>${rows[idx][classCol] || '-'}</td></tr>`; });
+            [3, 4].forEach(idx => { 
+                if(rows[idx]?.[0]) html += `<tr><td>${rows[idx][0]}</td><td>${rows[idx][classCol] || '-'}</td></tr>`; 
+            });
             html += `<tr class="ds-type-header"><td colspan="2">Major Exams</td></tr>`;
         }
-        [6, 7, 8, 9, 10, 11].forEach(idx => { if(rows[idx]?.[0]) html += `<tr><td>${rows[idx][0]}</td><td>${rows[idx][classCol] || '-'}</td></tr>`; });
+        [6, 7, 8, 9, 10, 11].forEach(idx => { 
+            if(rows[idx]?.[0]) html += `<tr><td>${rows[idx][0]}</td><td>${rows[idx][classCol] || '-'}</td></tr>`; 
+        });
     }
-    dsBody.innerHTML = html || "<tr><td colspan='2'>Nothing to show</td></tr>";
+    document.getElementById("dsBody").innerHTML = html || "<tr><td colspan='2'>Nothing to show</td></tr>";
 }
 function setupPaymentLink(amount, btnId) {
     const btn = document.getElementById(btnId); if(!btn) return;
